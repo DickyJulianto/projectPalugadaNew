@@ -41,7 +41,7 @@ registerForm.addEventListener('submit', async (event) => {
 
     // 5. Mengirim data ke API
     try {
-        const response = await fetch('https://render.com/docs/web-services?_gl=1*1q6cdol*_gcl_au*MTUwOTgxNzY0My4xNzQ5Mzk5MTc4*_ga*MTA1MTgwNTE4OC4xNzQ5Mzk5MTc4*_ga_QK9L9QJC5N*czE3NDkzOTkxNzckbzEkZzEkdDE3NDkzOTkyNTgkajU3JGwwJGgw#port-binding', {
+        const response = await fetch('https://projectpalugada.onrender.com', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -86,7 +86,7 @@ loginForm.addEventListener('submit', async (event) => {
 
     // 4. Kirim data ke API login
     try {
-        const response = await fetch('https://render.com/docs/web-services?_gl=1*1q6cdol*_gcl_au*MTUwOTgxNzY0My4xNzQ5Mzk5MTc4*_ga*MTA1MTgwNTE4OC4xNzQ5Mzk5MTc4*_ga_QK9L9QJC5N*czE3NDkzOTkxNzckbzEkZzEkdDE3NDkzOTkyNTgkajU3JGwwJGgw#port-binding', {
+        const response = await fetch('https://projectpalugada.onrender.com', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
