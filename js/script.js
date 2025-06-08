@@ -11,7 +11,7 @@ $(document).ready(function(){
     // Cek status login saat halaman dimuat
 const token = localStorage.getItem('token');
 if (token) {
-    fetch('http://localhost:5000/api/user', {
+    fetch('https://render.com/docs/web-services?_gl=1*1q6cdol*_gcl_au*MTUwOTgxNzY0My4xNzQ5Mzk5MTc4*_ga*MTA1MTgwNTE4OC4xNzQ5Mzk5MTc4*_ga_QK9L9QJC5N*czE3NDkzOTkxNzckbzEkZzEkdDE3NDkzOTkyNTgkajU3JGwwJGgw#port-binding', {
         method: 'GET',
         headers: {
             'x-auth-token': token

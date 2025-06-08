@@ -80,7 +80,7 @@ app.post('/api/login', async (req, res) => {
 
         jwt.sign(
             payload,
-            'kunciRahasianIniTidakBolehDiketahuiOrangLain', // Kunci rahasia untuk "menandatangani" token
+            'ap4luM4u9Uaad4', // Kunci rahasia untuk "menandatangani" token
             { expiresIn: '1h' }, // Token akan kedaluwarsa dalam 1 jam
             (err, token) => {
                 if (err) throw err;
@@ -94,18 +94,6 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// Rute Terproteksi untuk mendapatkan data pengguna
-// Perhatikan 'auth' disisipkan sebagai argumen kedua
-app.get('/api/user', auth, async (req, res) => {
-    try {
-        // req.user.id didapat dari middleware auth setelah verifikasi token
-        const user = await User.findById(req.user.id).select('-password');
-        res.json(user);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Server Error');
-    }
-});
 
 // Buat testing
 app.get('/', (req, res) => {
