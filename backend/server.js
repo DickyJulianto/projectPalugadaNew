@@ -6,17 +6,26 @@ const auth = require('./middleware/auth');
 const jwt = require('jsonwebtoken');
 const User = require('./models/user');
 
+// Muat environment variables dari file .env
+require('dotenv').config();
+
 const app = express();
-const PORT = 5000;
+const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 
-const DB_URI = 'mongodb+srv://dicky_js:renjerBiru123@cluster0.esghfyl.mongodb.net/palugada-db?retryWrites=true&w=majority&appName=Cluster0';
+// MongoDB Connection menggunakan MONGO_URI dari .env
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
+.then(() => console.log('MongoDB connected successfully'))
+.catch(err => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1); // Keluar dari aplikasi jika koneksi database gagal
+});
 
-mongoose.connect(DB_URI)
-    .then(() => console.log('Berhasil terhubung ke MongoDB Atlas'))
-    .catch(err => console.error('Gagal terhubung ke MongoDB:', err));
 
 app.post('/api/register', async (req, res) => {
 try {

@@ -1,25 +1,19 @@
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
-// Kunci rahasia yang sama dengan yang ada di server.js
-const JWT_SECRET = 'kunciRahasianIniTidakBolehDiketahuiOrangLain';
-
-function auth(req, res, next) {
-    // 1. Ambil token dari header permintaan
+module.exports = function(req, res, next) {
     const token = req.header('x-auth-token');
 
-    // 2. Cek apakah token ada
     if (!token) {
-        return res.status(401).json({ message: 'Akses ditolak. Tidak ada token.' });
+        return res.status(401).json({ msg: 'No token, authorization denied' });
     }
 
     try {
-        // 3. Verifikasi token
-        const decoded = jwt.verify(token, JWT_SECRET);
-        // 4. Tambahkan payload (data user) dari token ke objek request
-        req.user = decoded.user;
-        next(); // Lanjutkan ke rute berikutnya
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
+        next();
     } catch (e) {
-        res.status(400).json({ message: 'Token tidak valid.' });
+        res.status(400).json({ msg: 'Token is not valid' });
     }
 }
 
