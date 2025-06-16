@@ -25,20 +25,27 @@ app.post('/register', async (req, res) => {
 // Login
 app.post('/login', async (req, res) => {
     try {
-        const user = await User.findOne({ username: req.body.username });
+        const { username, password } = req.body;
+
+        // Cari user berdasarkan username ATAU email
+        const user = await User.findOne({
+            $or: [{ username: username }, { email: username }]
+        });
+
         if (!user) {
-            return res.status(400).send('Invalid credentials');
+            return res.status(400).json({ message: 'Kredensial tidak valid' });
         }
 
-        const isMatch = await bcrypt.compare(req.body.password, user.password);
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(400).send('Invalid credentials');
+            return res.status(400).json({ message: 'Kredensial tidak valid' });
         }
 
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        // Pastikan Anda sudah mengatur JWT_SECRET di environment variables Render
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'your_jwt_secret', { expiresIn: '1h' });
         res.json({ token });
     } catch (error) {
-        res.status(500).send(error.message);
+        res.status(500).json({ message: error.message });
     }
 });
 
