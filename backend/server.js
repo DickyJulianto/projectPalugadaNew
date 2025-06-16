@@ -1,116 +1,84 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const cors = require('cors');
-const auth = require('./middleware/auth');
 const jwt = require('jsonwebtoken');
-const User = require('./models/user');
-
-// Muat environment variables dari file .env
-require('dotenv').config();
+const cors = require('cors');
+const User = require('./models/user'); // Pastikan path ini benar
 
 const app = express();
-const port = process.env.PORT || 3000;
-
 app.use(cors());
 app.use(express.json());
 
-// MongoDB Connection menggunakan MONGO_URI dari .env
-mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
-.then(() => console.log('MongoDB connected successfully'))
-.catch(err => {
-    console.error('MongoDB connection error:', err);
-    process.exit(1); // Keluar dari aplikasi jika koneksi database gagal
-});
-
-
-app.post('/api/register', async (req, res) => {
-try {
-    // Ambil data dari body request
-    const { username, email, password } = req.body;
-
-    // Mengecek apakah email sudah terdaftar
-    const existingUser = await User.findOne({ email: email });
-    if (existingUser) {
-        return res.status(400).json({ message: 'Email sudah terdaftar.' });
-    }
-
-    // Enkripsi password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Membuat user baru
-    const newUser = new User({
-        username: username,
-        email: email,
-        password: hashedPassword
-    });
-
-    // Menyimpan user baru ke database
-    await newUser.save();
-
-    // Mengirim respons sukses
-    res.status(201).json({ message: 'Pengguna berhasil didaftarkan!' });
-
-    } catch (error) {
-    // Kalo ada masalah di server
-    console.error(error);
-    res.status(500).json({ message: 'Terjadi kesalahan pada server.' });
-    }
-});
-
-// Rute Login -- BARU --
-app.post('/api/login', async (req, res) => {
+// Register
+app.post('/register', async (req, res) => {
     try {
-        // 1. Ambil email dan password dari body permintaan
-        const { email, password } = req.body;
-
-        // 2. Cek apakah pengguna dengan email tersebut ada
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ message: 'Email tidak ditemukan.' });
-        }
-
-        // 3. Bandingkan password yang dimasukkan dengan hash di database
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Password salah.' });
-        }
-
-        // 4. Jika password cocok, buat JSON Web Token (JWT)
-        const payload = {
-            user: {
-                id: user.id // Simpan ID pengguna di dalam token
-            }
-        };
-
-        jwt.sign(
-            payload,
-            'ap4luM4u9Uaad4', // Kunci rahasia untuk "menandatangani" token
-            { expiresIn: '1h' }, // Token akan kedaluwarsa dalam 1 jam
-            (err, token) => {
-                if (err) throw err;
-                res.json({ token }); // Kirim token ke klien
-            }
-        );
-
+        const { username, password } = req.body;
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const user = new User({ username, password: hashedPassword });
+        await user.save();
+        res.status(201).send('User registered');
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Terjadi kesalahan pada server.' });
+        res.status(400).send(error.message);
     }
 });
 
+// Login
+app.post('/login', async (req, res) => {
+    try {
+        const user = await User.findOne({ username: req.body.username });
+        if (!user) {
+            return res.status(400).send('Invalid credentials');
+        }
 
-// Buat testing
+        const isMatch = await bcrypt.compare(req.body.password, user.password);
+        if (!isMatch) {
+            return res.status(400).send('Invalid credentials');
+        }
+
+        const token = jwt.sign({ userId: user._id }, 'your_jwt_secret', { expiresIn: '1h' });
+        res.json({ token });
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+});
+
+// Welcome
 app.get('/', (req, res) => {
-    res.send('<h1>Server PaluGada Aktif!</h1>');
+    res.send('Welcome to the authentication server!');
+});
+
+// Protected route
+const auth = (req, res, next) => {
+    try {
+        const token = req.header('Authorization').replace('Bearer ', '');
+        if (!token) {
+            return res.status(401).send('Access denied');
+        }
+
+        const decoded = jwt.verify(token, 'your_jwt_secret');
+        req.user = decoded;
+        next();
+    } catch (error) {
+        res.status(400).send('Invalid token');
+    }
+};
+
+app.get('/protected', auth, (req, res) => {
+    res.send('This is a protected route');
 });
 
 
-// Menjalankan Server
+// Connect to MongoDB
+mongoose.connect('mongodb+srv://dicky:dicky@cluster0.vnvpqwz.mongodb.net/palugada-db?retryWrites=true&w=majority&appName=Cluster0', {
+    // useNewUrlParser dan useUnifiedTopology tidak lagi diperlukan di Mongoose versi 6 ke atas,
+    // namun tidak masalah jika masih ada.
+})
+.then(() => console.log('MongoDB connected'))
+.catch(err => console.log(err));
+
+// Definisikan PORT sebelum digunakan
+const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
-    console.log(`Server berhasil berjalan di http://localhost:${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
