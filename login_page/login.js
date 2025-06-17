@@ -12,6 +12,7 @@ loginBtn.addEventListener('click', () => {
 
 // --- FORM REGISTRASI ---
 const registerForm = document.getElementById('registerForm');
+
 registerForm.addEventListener('submit', async (event) => {
     event.preventDefault();
 
@@ -25,6 +26,7 @@ registerForm.addEventListener('submit', async (event) => {
         return;
     }
 
+    // Pastikan data yang dikirim memiliki field 'username', 'email', dan 'password'
     const formData = {
         username: username,
         email: email,
@@ -32,52 +34,60 @@ registerForm.addEventListener('submit', async (event) => {
     };
 
     try {
-        // PERBAIKAN: Menambahkan endpoint /register
+        // Pastikan endpointnya adalah '/register'
         const response = await fetch('https://projectpalugada.onrender.com/register', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify(formData)
         });
 
         const resultText = await response.text();
+
         if (response.ok) {
             alert(resultText); // Menampilkan pesan sukses dari server
-            loginBtn.click(); // Pindah ke tampilan login
+            loginBtn.click(); // Otomatis pindah ke tampilan login
         } else {
-            // Jika ada pesan error dari server dalam format JSON
+            // Coba parsing sebagai JSON dulu untuk pesan error yang lebih baik
             try {
                 const resultJson = JSON.parse(resultText);
                 alert('Error: ' + resultJson.message);
             } catch {
-                alert('Error: ' + resultText);
+                alert('Error: ' + resultText); // Fallback jika pesan bukan JSON
             }
         }
 
     } catch (error) {
-        console.error('Terjadi kesalahan:', error);
-        alert('Tidak dapat terhubung ke server registrasi. Silakan coba lagi nanti.');
+        console.error('Terjadi kesalahan saat registrasi:', error);
+        alert('Tidak dapat terhubung ke server registrasi.');
     }
 });
 
+
 // --- LOGIKA LOGIN ---
 const loginForm = document.getElementById('loginForm');
+
 loginForm.addEventListener('submit', async (event) => {
     event.preventDefault();
 
-    // Mengirim username dan password. User bisa input username atau email di form.
+    // Di backend, kita sudah atur agar bisa menerima username atau email
     const usernameOrEmail = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
 
+    // Backend mengharapkan field 'username', jadi kita kirim input sebagai username
     const formData = {
-        username: usernameOrEmail, // Mengirim sebagai 'username' ke backend
+        username: usernameOrEmail,
         password: password
     };
 
     try {
-        // PERBAIKAN: Menambahkan endpoint /login
+        // Pastikan endpointnya adalah '/login'
         const response = await fetch('https://projectpalugada.onrender.com/login', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify(formData)
         });
 
@@ -86,13 +96,13 @@ loginForm.addEventListener('submit', async (event) => {
         if (response.ok) {
             alert('Login berhasil!');
             localStorage.setItem('token', result.token);
-            window.location.href = '../index.html';
+            window.location.href = '../index.html'; // Arahkan ke halaman utama setelah login
         } else {
             alert('Error: ' + (result.message || 'Kredensial tidak valid'));
         }
 
     } catch (error) {
-        console.error('Terjadi kesalahan:', error);
+        console.error('Terjadi kesalahan saat login:', error);
         alert('Tidak dapat terhubung ke server login.');
     }
 });
