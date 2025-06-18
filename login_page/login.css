@@ -76,59 +76,45 @@ form {
     width: 100%;
 }
 
-.container h1, .container h2 {
+.container h1 {
     font-size: 36px;
     margin-bottom: 20px;
 }
 
-.input-group {
+.input-box {
     position: relative;
-    margin: 25px 0;
-    width: 100%;
+    margin: 1.25rem 0;
 }
 
-.input-group input {
+.input-box input {
     width: 100%;
-    height: 50px;
-    background: transparent;
+    padding: 13px 50px 13px 20px;
+    background: #eee;
+    border-radius: 8px;
     border: none;
     outline: none;
-    border-bottom: 2px solid #ccc;
     font-size: 16px;
-    padding-left: 5px;
     color: #333;
     font-weight: 500;
-    transition: .5s;
 }
 
-.input-group label {
-    position: absolute;
-    top: 50%;
-    left: 5px;
-    transform: translateY(-50%);
+.input-box input::placeholder {
     color: #888;
-    pointer-events: none;
-    transition: .5s;
+    font-weight: 400;
 }
 
-.input-group input:focus~label,
-.input-group input:valid~label {
-    top: -5px;
-    font-size: 14px;
-    color: var(--blue);
-}
-
-.error-message {
-    color: #ff4757;
-    font-size: 0.8rem;
-    margin-top: 5px;
-    display: none;
-    text-align: left;
-    width: 100%;
+.input-box i {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: #888;
 }
 
 .forgot-link {
-    margin: 15px 0 15px;
+    margin: -5px 0 15px;
+    text-align: right;
 }
 
 .forgot-link a {
@@ -149,10 +135,11 @@ form {
     color: #fff;
     font-weight: 600;
     letter-spacing: 1.8px;
+    margin-top: 15px;
 }
 
 .sign-link {
-    margin-top: 20px;
+    margin-top: 25px;
 }
 
 .sign-link p {
