@@ -14,10 +14,10 @@
 
     <div class="container">
         <div class="form-box login">
-            <form id="loginForm">
+            <form id="loginForm" action="">
                 <h1>Login</h1>
                 <div class="input-box">
-                    <input id="loginEmail" type="text" placeholder="Username or Email" required>
+                    <input id="loginEmail" type="text" placeholder="Email" required>
                     <i class='bx bxs-user'></i>
                 </div>
                 <div class="input-box">
@@ -28,14 +28,18 @@
                     <a href="#">Forgot password?</a>
                 </div>
                 <button type="submit" class="btn">Login</button>
-                <div class="sign-link">
-                    <p>Don't have an account? <a href="#" class="signUp-link register-btn">Sign Up</a></p>
+                <p>Login With Other Method</p>
+                <div class="social-icons">
+                    <a href="#"><i class='bx bxl-google'></i></a>
+                    <a href="#"><i class='bx bxl-facebook'></i></a>
+                    <a href="#"><i class='bx bxl-github'></i></a>
+                    <a href="#"><i class='bx bxl-linkedin'></i></a>
                 </div>
             </form>
         </div>
 
         <div class="form-box register">
-            <form id="registerForm">
+            <form id="registerForm" action="">
                 <h1>Registration</h1>
                 <div class="input-box">
                     <input type="text" id="registerUsername" placeholder="Username" required>
@@ -54,16 +58,12 @@
                     <i class='bx bxs-lock-alt'></i>
                 </div>
                 <button type="submit" class="btn">Register</button>
-                
                 <p>Register With Other Method</p>
                 <div class="social-icons">
                     <a href="#"><i class='bx bxl-google'></i></a>
                     <a href="#"><i class='bx bxl-facebook'></i></a>
                     <a href="#"><i class='bx bxl-github'></i></a>
                     <a href="#"><i class='bx bxl-linkedin'></i></a>
-                </div>
-                <div class="sign-link">
-                    <p>Already have an account? <a href="#" class="signIn-link login-btn">Sign In</a></p>
                 </div>
             </form>
         </div>
@@ -82,6 +82,7 @@
         </div>
     </div>
     
+
     <script src="login.js"></script>
 </body>
 
