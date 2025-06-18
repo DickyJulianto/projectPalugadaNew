@@ -111,6 +111,15 @@ form {
     color: #888;
 }
 
+.error-message {
+    color: #ff4757;
+    font-size: 0.8rem;
+    margin-top: 5px;
+    display: none;
+    text-align: left;
+    width: 100%;
+}
+
 .forgot-link {
     margin: 15px 0 15px;
 }

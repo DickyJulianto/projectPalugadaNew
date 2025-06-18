@@ -1,8 +1,11 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const jwt =require('jsonwebtoken');
 const cors = require('cors');
+// Import modul baru untuk validasi
+const { body, validationResult } = require('express-validator');
+
 const User = require('./models/user');
 
 const app = express();
@@ -11,76 +14,70 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Rute dasar untuk mengecek apakah server berjalan
+// Rute dasar
 app.get('/', (req, res) => {
     res.send('Welcome to the Palugada authentication server!');
 });
 
-// --- Rute Registrasi (Register) ---
-app.post('/register', async (req, res) => {
-    try {
-        // Mengambil username, email, dan password dari body request
-        const { username, email, password } = req.body;
-
-        // Validasi dasar untuk memastikan semua data ada
-        if (!username || !email || !password) {
-            return res.status(400).json({ message: 'Username, email, dan password wajib diisi.' });
+// --- Rute Registrasi dengan Validasi ---
+app.post(
+    '/register',
+    // Middleware validasi ditempatkan di sini
+    [
+        body('username', 'Username minimal 3 karakter').isLength({ min: 3 }).trim().escape(),
+        body('email', 'Format email tidak valid').isEmail().normalizeEmail(),
+        body('password', 'Password minimal 8 karakter').isLength({ min: 8 })
+    ],
+    async (req, res) => {
+        // 1. Cek hasil validasi
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            // Jika ada error, kirim status 400 dengan daftar error
+            return res.status(400).json({ errors: errors.array() });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-        
-        // Membuat user baru dengan menyertakan email
-        const user = new User({ username, email, password: hashedPassword });
-        
-        await user.save();
-        
-        // Mengirim respons sukses yang lebih konsisten
-        res.status(201).send('User registered successfully');
+        try {
+            // 2. Lanjutkan proses jika tidak ada error validasi
+            const { username, email, password } = req.body;
 
-    } catch (error) {
-        // Menangani error jika username atau email sudah ada (kode error 11000)
-        if (error.code === 11000) {
-            return res.status(400).json({ message: 'Username atau email sudah digunakan.' });
+            const hashedPassword = await bcrypt.hash(password, 10);
+            const user = new User({ username, email, password: hashedPassword });
+            await user.save();
+            
+            res.status(201).send('User registered successfully');
+
+        } catch (error) {
+            if (error.code === 11000) {
+                return res.status(400).json({ errors: [{ msg: 'Username atau email sudah digunakan.' }] });
+            }
+            res.status(500).json({ errors: [{ msg: 'Terjadi kesalahan pada server: ' + error.message }] });
         }
-        // Menangani error server lainnya
-        res.status(500).json({ message: 'Terjadi kesalahan pada server: ' + error.message });
     }
-});
+);
 
 
-// --- Rute Login ---
+// --- Rute Login (sudah benar, tidak perlu diubah) ---
 app.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
-
-        // Cari user berdasarkan username ATAU email
         const user = await User.findOne({
             $or: [{ username: username }, { email: username }]
         });
-
-        // Jika user tidak ditemukan, kirim pesan error
         if (!user) {
             return res.status(400).json({ message: 'Kredensial tidak valid' });
         }
-
-        // Bandingkan password yang diinput dengan yang ada di database
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({ message: 'Kredensial tidak valid' });
         }
-
-        // Buat token jika login berhasil
-        // Pastikan Anda sudah mengatur JWT_SECRET di environment variables Render
         const token = jwt.sign(
             { userId: user._id },
-            process.env.JWT_SECRET || 'your_fallback_jwt_secret', // Gunakan fallback untuk keamanan
+            process.env.JWT_SECRET || 'your_fallback_jwt_secret',
             { expiresIn: '1h' }
         );
-        
         res.json({ token });
-
     } catch (error) {
-        res.status(500).json({ message: 'Terjadi kesalahan pada server: ' + error.message });
+        res.status(500).json({ message: error.message });
     }
 });
 
@@ -89,11 +86,8 @@ app.post('/login', async (req, res) => {
 const auth = (req, res, next) => {
     try {
         const token = req.header('Authorization').replace('Bearer ', '');
-        if (!token) {
-            return res.status(401).send('Access denied');
-        }
+        if (!token) { return res.status(401).send('Access denied'); }
 
-        // Verifikasi token dengan secret key dari environment variable
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_fallback_jwt_secret');
         req.user = decoded;
         next();
@@ -108,14 +102,12 @@ app.get('/protected', auth, (req, res) => {
 
 
 // --- Koneksi ke MongoDB ---
-// Menggunakan URI dari environment variable yang sudah diatur di Render
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.log(err));
 
 
 // --- Menjalankan Server ---
-// Menggunakan PORT dari environment variable yang diberikan Render
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
