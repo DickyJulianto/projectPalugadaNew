@@ -34,7 +34,7 @@ if (registerForm) {
         // Validasi frontend sederhana untuk konfirmasi password
         if (password !== confirmPassword) {
             const errorElement = document.getElementById('error-confirmPassword');
-            errorElement.textContent = "Password dan konfirmasi password tidak cocok!";
+            errorElement.textContent = "Password tidak cocok!";
             errorElement.style.display = 'block';
             return;
         }
@@ -109,7 +109,7 @@ if (loginForm) {
                 window.location.href = '../index.html';
             } else {
                 // Tampilkan pesan error di dalam form, bukan alert
-                errorLoginElement.textContent = result.message || 'Kredensial tidak valid';
+                errorLoginElement.textContent = result.message || 'Password Atau Username Salah';
                 errorLoginElement.style.display = 'block';
             }
         } catch (error) {
