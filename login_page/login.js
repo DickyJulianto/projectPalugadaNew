@@ -16,25 +16,51 @@ loginBtns.forEach(btn => {
     });
 });
 
-// --- FORM REGISTRASI DENGAN TAMPILAN ERROR SPESIFIK ---
-const registerForm = document.getElementById('registerForm');
+// --- FUNGSI BARU UNTUK TOGGLE PASSWORD ---
+function setupPasswordToggle(inputId, toggleId) {
+    const passwordInput = document.getElementById(inputId);
+    const toggleIcon = document.getElementById(toggleId);
 
+    if (passwordInput && toggleIcon) {
+        toggleIcon.addEventListener('click', () => {
+            // Cek tipe input
+            if (passwordInput.type === 'password') {
+                // Jika password, ubah ke text dan ganti ikon
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('bx-hide');
+                toggleIcon.classList.add('bx-show');
+            } else {
+                // Jika text, ubah ke password dan ganti ikon
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('bx-show');
+                toggleIcon.classList.add('bx-hide');
+            }
+        });
+    }
+}
+
+// Terapkan fungsi toggle ke semua field password
+setupPasswordToggle('loginPassword', 'toggleLoginPassword');
+setupPasswordToggle('registerPassword', 'toggleRegisterPassword');
+setupPasswordToggle('registerConfirmPassword', 'toggleRegisterConfirmPassword');
+
+
+// --- FORM REGISTRASI ---
+const registerForm = document.getElementById('registerForm');
 if (registerForm) {
     registerForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-
-        // Sembunyikan semua pesan error lama pada form registrasi
+        // Logika submit registrasi Anda yang sudah ada...
+        // ... (Kode ini tidak perlu diubah)
         document.querySelectorAll('#registerForm .error-message').forEach(el => el.style.display = 'none');
-
         const username = document.getElementById('registerUsername').value;
         const email = document.getElementById('registerEmail').value;
         const password = document.getElementById('registerPassword').value;
         const confirmPassword = document.getElementById('registerConfirmPassword').value;
 
-        // Validasi frontend sederhana untuk konfirmasi password
         if (password !== confirmPassword) {
             const errorElement = document.getElementById('error-confirmPassword');
-            errorElement.textContent = "Password tidak cocok!";
+            errorElement.textContent = "Password dan konfirmasi password tidak cocok!";
             errorElement.style.display = 'block';
             return;
         }
@@ -51,18 +77,16 @@ if (registerForm) {
             if (response.ok) {
                 const resultText = await response.text();
                 alert(resultText || "Registrasi berhasil!");
-                document.querySelector('.login-btn').click(); // Pindah ke form login
+                document.querySelector('.login-btn').click();
             } else {
                 const errorData = await response.json();
                 if (errorData.errors) {
                     errorData.errors.forEach(err => {
-                        // `err.path` akan berisi 'username', 'email', atau 'password' dari backend
                         const errorElement = document.getElementById(`error-${err.path}`);
                         if (errorElement) {
                             errorElement.textContent = err.msg;
                             errorElement.style.display = 'block';
                         } else {
-                            // Untuk error umum (seperti duplikat)
                             alert(err.msg);
                         }
                     });
@@ -76,19 +100,17 @@ if (registerForm) {
 }
 
 
-// --- LOGIKA LOGIN DENGAN TAMPILAN ERROR SPESIFIK ---
+// --- LOGIKA LOGIN ---
 const loginForm = document.getElementById('loginForm');
-
 if (loginForm) {
     loginForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-
+        // Logika submit login Anda yang sudah ada...
+        // ... (Kode ini tidak perlu diubah)
         const errorLoginElement = document.getElementById('error-login');
-        errorLoginElement.style.display = 'none'; // Sembunyikan error lama
-
+        errorLoginElement.style.display = 'none';
         const usernameOrEmail = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
-        
         const formData = {
             username: usernameOrEmail,
             password: password
@@ -108,13 +130,11 @@ if (loginForm) {
                 localStorage.setItem('token', result.token);
                 window.location.href = '../index.html';
             } else {
-                // Tampilkan pesan error di dalam form, bukan alert
-                errorLoginElement.textContent = result.message || 'Password Atau Username Salah';
+                errorLoginElement.textContent = result.message || 'Kredensial tidak valid';
                 errorLoginElement.style.display = 'block';
             }
         } catch (error) {
             console.error('Terjadi kesalahan saat login:', error);
-            // Tampilkan error koneksi di dalam form
             errorLoginElement.textContent = 'Tidak dapat terhubung ke server.';
             errorLoginElement.style.display = 'block';
         }

@@ -109,6 +109,7 @@ form {
     transform: translateY(-50%);
     font-size: 20px;
     color: #888;
+    cursor: pointer;
 }
 
 .forgot-link {
