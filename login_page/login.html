@@ -14,30 +14,26 @@
 
     <div class="container">
         <div class="form-box login">
-            <form id="loginForm" action="">
+            <form id="loginForm">
                 <h1>Login</h1>
-                <div class="input-box">
-                    <input id="loginEmail" type="text" placeholder="Email" required>
-                    <i class='bx bxs-user'></i>
+                <div class="input-group">
+                    <input type="text" id="loginEmail" required>
+                    <label for="loginEmail">Username or Email</label>
+                    <span class="error-message" id="error-login"></span>
                 </div>
-                <div class="input-box">
-                    <input id="loginPassword" type="password" placeholder="Password" required>
-                    <i class='bx bxs-lock-alt'></i>
+                <div class="input-group">
+                    <input type="password" id="loginPassword" required>
+                    <label for="loginPassword">Password</label>
                 </div>
                 <div class="forgot-link">
                     <a href="#">Forgot password?</a>
                 </div>
                 <button type="submit" class="btn">Login</button>
-                <p>Login With Other Method</p>
-                <div class="social-icons">
-                    <a href="#"><i class='bx bxl-google'></i></a>
-                    <a href="#"><i class='bx bxl-facebook'></i></a>
-                    <a href="#"><i class='bx bxl-github'></i></a>
-                    <a href="#"><i class='bx bxl-linkedin'></i></a>
+                <div class="sign-link">
+                    <p>Don't have an account? <a href="#" class="signUp-link register-btn">Sign Up</a></p>
                 </div>
             </form>
         </div>
-
         <div class="form-box register">
             <form id="registerForm">
                 <h2>Register</h2>
@@ -82,7 +78,6 @@
         </div>
     </div>
     
-
     <script src="login.js"></script>
 </body>
 
