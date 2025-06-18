@@ -1,44 +1,47 @@
 const container = document.querySelector('.container');
 const registerBtn = document.querySelector('.register-btn');
-const loginBtn = document.querySelectorAll('.login-btn, .signIn-link'); // Memilih kedua tombol login
+const loginBtn = document.querySelector('.login-btn');
 
 registerBtn.addEventListener('click', () => {
     container.classList.add('active');
 });
 
-loginBtn.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        e.preventDefault(); // Mencegah link # refresh halaman
-        container.classList.remove('active');
-    });
+loginBtn.addEventListener('click', () => {
+    container.classList.remove('active');
 });
 
+// --- FORM REGISRTRASI ---
 
-// --- FORM REGISTRASI ---
+// 1. Pilih elemen form registrasi
 const registerForm = document.getElementById('registerForm');
 
+// 2. Menambahkan event listener saat form disubmit
 registerForm.addEventListener('submit', async (event) => {
+    // Agar form tidak melakukan reload halaman
     event.preventDefault();
 
+    // 3. Ambil nilai dari setiap input
     const username = document.getElementById('registerUsername').value;
     const email = document.getElementById('registerEmail').value;
     const password = document.getElementById('registerPassword').value;
     const confirmPassword = document.getElementById('registerConfirmPassword').value;
 
+    // Untuk validasi
     if (password !== confirmPassword) {
         alert("Password dan konfirmasi password tidak cocok!");
         return;
     }
 
+    // 4. Menyiapkan data untuk dikirim ke server
     const formData = {
         username: username,
         email: email,
         password: password
     };
 
+    // 5. Mengirim data ke API
     try {
-        // PERBAIKAN: URL API menuju endpoint /register
-        const response = await fetch('https://projectpalugada.onrender.com/register', {
+        const response = await fetch('https://projectpalugada.onrender.com', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -46,16 +49,15 @@ registerForm.addEventListener('submit', async (event) => {
             body: JSON.stringify(formData)
         });
 
-        if (response.ok) {
-            const resultText = await response.text();
-            alert(resultText || "Registrasi berhasil!");
-            // Otomatis pindah ke form login setelah registrasi sukses
-            document.querySelector('.login-btn').click();
-        } else {
-            // Menangani error dari backend
-            const errorData = await response.json();
-            // Menampilkan error validasi pertama yang ditemukan
-            alert('Error: ' + (errorData.errors ? errorData.errors[0].msg : 'Registrasi gagal.'));
+        // Untuk Mengubah respons server menjadi format JSON
+        const result = await response.json();
+
+        // 6. Menampilkan pesan dari server
+        if (response.ok) { // Kalo kode 200-299 = sukses
+            alert(result.message);
+            loginBtn.click();
+        } else { // Kalo kode 400-599 = gagal
+            alert('Error: ' + result.message);
         }
 
     } catch (error) {
@@ -64,25 +66,27 @@ registerForm.addEventListener('submit', async (event) => {
     }
 });
 
+// --- LOGIKA LOGIN BARU ---
 
-// --- LOGIKA LOGIN ---
+// 1. Pilih elemen form login
 const loginForm = document.getElementById('loginForm');
 
+// 2. Tambahkan event listener saat form di-submit
 loginForm.addEventListener('submit', async (event) => {
     event.preventDefault();
 
-    const usernameOrEmail = document.getElementById('loginEmail').value;
+    // 3. Ambil nilai dari input email dan password
+    const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
-    
-    // PERBAIKAN: Pastikan mengirim "username" karena itu yang diharapkan backend
+
     const formData = {
-        username: usernameOrEmail,
+        email: email,
         password: password
     };
 
+    // 4. Kirim data ke API login
     try {
-        // PERBAIKAN: URL API menuju endpoint /login
-        const response = await fetch('https://projectpalugada.onrender.com/login', {
+        const response = await fetch('https://projectpalugada.onrender.com', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -94,10 +98,12 @@ loginForm.addEventListener('submit', async (event) => {
 
         if (response.ok) {
             alert('Login berhasil!');
+            // 5. Simpan token di localStorage browser
             localStorage.setItem('token', result.token);
+            // 6. Arahkan pengguna ke halaman utama
             window.location.href = '../index.html'; // Sesuaikan path jika perlu
         } else {
-            alert('Error: ' + (result.message || 'Kredensial tidak valid'));
+            alert('Error: ' + result.message);
         }
 
     } catch (error) {
