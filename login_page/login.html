@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -9,9 +8,7 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="login.css">
 </head>
-
 <body>
-
     <div class="container">
         <div class="form-box login">
             <form id="loginForm">
@@ -20,12 +17,13 @@
                     <input id="loginEmail" type="text" placeholder="Username or Email" required>
                     <i class='bx bxs-user'></i>
                 </div>
-                <span class="error-message" id="error-login"></span>
-
                 <div class="input-box">
                     <input id="loginPassword" type="password" placeholder="Password" required>
                     <i class='bx bxs-lock-alt'></i>
                 </div>
+                
+                <span class="error-message" id="error-login"></span>
+
                 <div class="forgot-link">
                     <a href="#">Forgot password?</a>
                 </div>
@@ -36,6 +34,9 @@
                     <a href="#"><i class='bx bxl-facebook'></i></a>
                     <a href="#"><i class='bx bxl-github'></i></a>
                     <a href="#"><i class='bx bxl-linkedin'></i></a>
+                </div>
+                <div class="sign-link">
+                    <p>Don't have an account? <a href="#" class="signUp-link register-btn">Sign Up</a></p>
                 </div>
             </form>
         </div>
@@ -66,6 +67,7 @@
                     <i class='bx bxs-lock-alt'></i>
                 </div>
                 <span class="error-message" id="error-confirmPassword"></span>
+
                 <button type="submit" class="btn">Register</button>
                 <p>Register With Other Method</p>
                 <div class="social-icons">
@@ -73,6 +75,9 @@
                     <a href="#"><i class='bx bxl-facebook'></i></a>
                     <a href="#"><i class='bx bxl-github'></i></a>
                     <a href="#"><i class='bx bxl-linkedin'></i></a>
+                </div>
+                <div class="sign-link">
+                    <p>Already have an account? <a href="#" class="signIn-link login-btn">Sign In</a></p>
                 </div>
             </form>
         </div>
@@ -91,8 +96,6 @@
         </div>
     </div>
     
-
     <script src="login.js"></script>
 </body>
-
 </html>
