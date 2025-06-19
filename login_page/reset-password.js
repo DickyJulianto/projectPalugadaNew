@@ -2,12 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('resetPasswordForm');
     const messageElement = document.getElementById('message');
 
-    // Ambil token dari URL
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
 
     if (!token) {
-        messageElement.textContent = 'Token tidak ditemukan. Silakan coba lagi dari link di email Anda.';
+        messageElement.textContent = 'Token tidak valid atau hilang. Silakan gunakan link dari email Anda.';
         messageElement.style.color = '#c0392b';
         messageElement.style.display = 'block';
         form.querySelector('button').disabled = true;
@@ -21,6 +20,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const confirmPassword = document.getElementById('confirmPassword').value;
         const submitButton = form.querySelector('button[type="submit"]');
 
+        if (password.length < 8) {
+            messageElement.textContent = 'Password minimal 8 karakter!';
+            messageElement.style.color = '#c0392b';
+            messageElement.style.display = 'block';
+            return;
+        }
+
         if (password !== confirmPassword) {
             messageElement.textContent = 'Password tidak cocok!';
             messageElement.style.color = '#c0392b';
@@ -30,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         submitButton.disabled = true;
         submitButton.textContent = 'Resetting...';
+        messageElement.style.display = 'none';
 
         try {
             const response = await fetch('https://projectpalugada.onrender.com/reset-password', {
@@ -42,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 alert(resultText);
-                // Arahkan ke halaman login setelah sukses
                 window.location.href = 'login.html';
             } else {
                 messageElement.textContent = JSON.parse(resultText).message || 'Gagal mereset password.';

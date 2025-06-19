@@ -6,7 +6,6 @@ document.getElementById('forgotPasswordForm').addEventListener('submit', async (
     const messageElement = document.getElementById('message');
     const submitButton = form.querySelector('button[type="submit"]');
 
-    // Nonaktifkan tombol dan tampilkan pesan loading
     submitButton.disabled = true;
     submitButton.textContent = 'Sending...';
     messageElement.style.display = 'none';
@@ -20,21 +19,20 @@ document.getElementById('forgotPasswordForm').addEventListener('submit', async (
 
         const resultText = await response.text();
 
-        // Tampilkan pesan sukses dari server
         messageElement.textContent = resultText;
-        messageElement.style.color = '#27ae60'; // Warna hijau untuk sukses
+        messageElement.style.color = response.ok ? '#27ae60' : '#c0392b'; // Hijau untuk sukses, merah untuk error
         messageElement.style.display = 'block';
 
-        // Reset form setelah berhasil
-        form.reset();
+        if (response.ok) {
+            form.reset();
+        }
 
     } catch (error) {
         console.error('Error:', error);
         messageElement.textContent = 'Tidak dapat terhubung ke server. Coba lagi nanti.';
-        messageElement.style.color = '#c0392b'; // Warna merah untuk error
+        messageElement.style.color = '#c0392b';
         messageElement.style.display = 'block';
     } finally {
-        // Aktifkan kembali tombol
         submitButton.disabled = false;
         submitButton.textContent = 'Send Reset Link';
     }
