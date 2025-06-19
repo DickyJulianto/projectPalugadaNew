@@ -1,5 +1,6 @@
 const container = document.querySelector('.container');
-const registerBtns = document.querySelectorAll('.register-btn');
+// Memperbaiki selector agar semua tombol register/login berfungsi
+const registerBtns = document.querySelectorAll('.register-btn, .signUp-link');
 const loginBtns = document.querySelectorAll('.login-btn, .signIn-link');
 
 registerBtns.forEach(btn => {
@@ -16,43 +17,15 @@ loginBtns.forEach(btn => {
     });
 });
 
-// --- FUNGSI BARU UNTUK TOGGLE PASSWORD ---
-function setupPasswordToggle(inputId, toggleId) {
-    const passwordInput = document.getElementById(inputId);
-    const toggleIcon = document.getElementById(toggleId);
-
-    if (passwordInput && toggleIcon) {
-        toggleIcon.addEventListener('click', () => {
-            // Cek tipe input
-            if (passwordInput.type === 'password') {
-                // Jika password, ubah ke text dan ganti ikon
-                passwordInput.type = 'text';
-                toggleIcon.classList.remove('bx-hide');
-                toggleIcon.classList.add('bx-show');
-            } else {
-                // Jika text, ubah ke password dan ganti ikon
-                passwordInput.type = 'password';
-                toggleIcon.classList.remove('bx-show');
-                toggleIcon.classList.add('bx-hide');
-            }
-        });
-    }
-}
-
-// Terapkan fungsi toggle ke semua field password
-setupPasswordToggle('loginPassword', 'toggleLoginPassword');
-setupPasswordToggle('registerPassword', 'toggleRegisterPassword');
-setupPasswordToggle('registerConfirmPassword', 'toggleRegisterConfirmPassword');
-
 
 // --- FORM REGISTRASI ---
 const registerForm = document.getElementById('registerForm');
+
 if (registerForm) {
     registerForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-        // Logika submit registrasi Anda yang sudah ada...
-        // ... (Kode ini tidak perlu diubah)
         document.querySelectorAll('#registerForm .error-message').forEach(el => el.style.display = 'none');
+
         const username = document.getElementById('registerUsername').value;
         const email = document.getElementById('registerEmail').value;
         const password = document.getElementById('registerPassword').value;
@@ -68,6 +41,7 @@ if (registerForm) {
         const formData = { username, email, password };
 
         try {
+            // PERBAIKAN: URL API menuju endpoint /register yang benar
             const response = await fetch('https://projectpalugada.onrender.com/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -94,7 +68,8 @@ if (registerForm) {
             }
         } catch (error) {
             console.error('Terjadi kesalahan saat registrasi:', error);
-            alert('Tidak dapat terhubung ke server registrasi.');
+            // Ini adalah alert yang Anda lihat sebelumnya
+            alert('Tidak dapat terhubung ke server. Silakan coba lagi nanti.');
         }
     });
 }
@@ -102,21 +77,25 @@ if (registerForm) {
 
 // --- LOGIKA LOGIN ---
 const loginForm = document.getElementById('loginForm');
+
 if (loginForm) {
     loginForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-        // Logika submit login Anda yang sudah ada...
-        // ... (Kode ini tidak perlu diubah)
+
         const errorLoginElement = document.getElementById('error-login');
         errorLoginElement.style.display = 'none';
+
         const usernameOrEmail = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
+        
+        // PERBAIKAN: Mengirim "username" sesuai yang diharapkan backend
         const formData = {
             username: usernameOrEmail,
             password: password
         };
 
         try {
+            // PERBAIKAN: URL API menuju endpoint /login yang benar
             const response = await fetch('https://projectpalugada.onrender.com/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -135,8 +114,8 @@ if (loginForm) {
             }
         } catch (error) {
             console.error('Terjadi kesalahan saat login:', error);
-            errorLoginElement.textContent = 'Tidak dapat terhubung ke server.';
-            errorLoginElement.style.display = 'block';
+            // Ini adalah alert yang Anda lihat sebelumnya
+            alert('Tidak dapat terhubung ke server.');
         }
     });
 }
