@@ -41,7 +41,6 @@ if (registerForm) {
         const formData = { username, email, password };
 
         try {
-            // PERBAIKAN: URL API menuju endpoint /register yang benar
             const response = await fetch('https://projectpalugada.onrender.com/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -68,8 +67,7 @@ if (registerForm) {
             }
         } catch (error) {
             console.error('Terjadi kesalahan saat registrasi:', error);
-            // Ini adalah alert yang Anda lihat sebelumnya
-            alert('Tidak dapat terhubung ke server. Silakan coba lagi nanti.');
+            alert('Tidak dapat terhubung ke server registrasi.');
         }
     });
 }
@@ -88,14 +86,12 @@ if (loginForm) {
         const usernameOrEmail = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
         
-        // PERBAIKAN: Mengirim "username" sesuai yang diharapkan backend
         const formData = {
             username: usernameOrEmail,
             password: password
         };
 
         try {
-            // PERBAIKAN: URL API menuju endpoint /login yang benar
             const response = await fetch('https://projectpalugada.onrender.com/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -104,18 +100,28 @@ if (loginForm) {
 
             const result = await response.json();
 
+            // ===============================================
+            // == PERBAIKAN SINTAKS ADA DI BLOK INI ==
+            // ===============================================
             if (response.ok) {
                 alert('Login berhasil!');
+                // Simpan token DAN peran pengguna
                 localStorage.setItem('token', result.token);
+                localStorage.setItem('userRole', result.role);
                 window.location.href = '../index.html';
             } else {
+                // blok 'else' ini sekarang berada di dalam 'try'
                 errorLoginElement.textContent = result.message || 'Kredensial tidak valid';
                 errorLoginElement.style.display = 'block';
             }
+            // ===============================================
+            // == AKHIR DARI PERBAIKAN SINTAKS ==
+            // ===============================================
+
         } catch (error) {
             console.error('Terjadi kesalahan saat login:', error);
-            // Ini adalah alert yang Anda lihat sebelumnya
-            alert('Tidak dapat terhubung ke server.');
+            errorLoginElement.textContent = 'Tidak dapat terhubung ke server.';
+            errorLoginElement.style.display = 'block';
         }
     });
 }
