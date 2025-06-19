@@ -94,7 +94,7 @@ app.post('/forgot-password', async (req, res) => {
 
         // 3. Simpan token dan waktu kedaluwarsa (misal: 1 jam) ke database
         user.resetPasswordToken = token;
-        user.resetPasswordExpires = Date.now() + 3600000; // 1 jam dalam milidetik
+        user.resetPasswordExpires = Date.now() + 1800000; // 30 menit dalam milidetik
         await user.save();
 
         // 4. Konfigurasi transporter email menggunakan Nodemailer
@@ -108,7 +108,7 @@ app.post('/forgot-password', async (req, res) => {
 
         // 5. Buat link reset (Arahkan ke halaman frontend Anda)
         // Pastikan URL frontend sudah benar
-        const resetLink = `https://projectpalugada.netlify.app/reset-password.html?token=${token}`;
+        const resetLink = `https://projectpalugada.netlify.app/login_page/reset-password.html?token=${token}`;
 
         // 6. Konfigurasi isi email
         const mailOptions = {
