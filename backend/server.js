@@ -1,3 +1,6 @@
+// Memuat environment variables dari file .env di paling atas
+require('dotenv').config();
+
 const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
@@ -11,7 +14,11 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = 'mongodb+srv://dickyjulian:dicky123@project-palugada.lgfqi4d.mongodb.net/?retryWrites=true&w=majority&appName=Project-Palugada';
+
+// Ambil koneksi string dari environment variable, bukan hardcode
+const MONGO_URI = process.env.MONGO_URI; 
+// Ambil JWT Secret dari environment variable
+const JWT_SECRET = process.env.JWT_SECRET;
 
 mongoose.connect(MONGO_URI, {
     useNewUrlParser: true,
@@ -20,7 +27,7 @@ mongoose.connect(MONGO_URI, {
     console.log('MongoDB connected');
 }).catch(err => console.log(err));
 
-// Rute Registrasi
+// Rute Registrasi (Tetap sama)
 app.post('/register', async (req, res) => {
     try {
         const { username, email, password } = req.body;
@@ -36,25 +43,21 @@ app.post('/register', async (req, res) => {
     }
 });
 
-// ===============================================
-// == PERBARUI RUTE LOGIN DI BAWAH INI ==
-// ===============================================
+// Rute Login (Sudah diperbarui dengan reCAPTCHA)
 app.post('/login', async (req, res) => {
     const { username, password, recaptchaToken } = req.body;
 
-    // --- BLOK VERIFIKASI RECAPTCHA ---
     try {
-        const secretKey = '6LfXy2crAAAAALcAfVkLmoKJDTrsVxsnnPIRKeCx'; // <-- SECRET KEY ANDA (Sangat disarankan dipindah ke .env)
+        // Ambil Secret Key dari environment variable untuk keamanan
+        const secretKey = process.env.RECAPTCHA_SECRET_KEY || '6LfXy2crAAAAALcAfVkLmoKJDTrsVxsnnPIRKeCx';
         const verificationURL = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${recaptchaToken}`;
-
+        
         const recaptchaResponse = await axios.post(verificationURL);
         
         if (!recaptchaResponse.data.success) {
             return res.status(400).json({ message: 'Verifikasi reCAPTCHA gagal. Silakan coba lagi.' });
         }
-        // --- AKHIR BLOK VERIFIKASI ---
 
-        // Jika reCAPTCHA valid, lanjutkan proses login
         const user = await User.findOne({
             $or: [{ email: username }, { username: username }]
         });
@@ -68,7 +71,8 @@ app.post('/login', async (req, res) => {
             return res.status(400).json({ message: 'Kredensial tidak valid' });
         }
 
-        const token = jwt.sign({ id: user._id, role: user.role }, 'your_jwt_secret', { expiresIn: '1h' });
+        // Gunakan JWT_SECRET dari .env
+        const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
         res.json({ token, role: user.role });
 
     } catch (error) {
@@ -76,18 +80,16 @@ app.post('/login', async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
-// ===============================================
-// == AKHIR PERBARUAN RUTE LOGIN ==
-// ===============================================
 
-// Middleware untuk melindungi rute
+// Middleware auth (Tetap sama, namun lebih aman jika JWT_SECRET dari .env)
 const auth = (req, res, next) => {
     const token = req.header('x-auth-token');
     if (!token) {
         return res.status(401).json({ message: 'No token, authorization denied' });
     }
     try {
-        const decoded = jwt.verify(token, 'your_jwt_secret');
+        // Gunakan JWT_SECRET dari .env
+        const decoded = jwt.verify(token, JWT_SECRET);
         req.user = decoded;
         next();
     } catch (e) {
@@ -95,11 +97,9 @@ const auth = (req, res, next) => {
     }
 };
 
-// Contoh rute yang dilindungi
 app.get('/protected', auth, (req, res) => {
     res.send(`Hello user ${req.user.id}, you have access. Your role is ${req.user.role}`);
 });
-
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
