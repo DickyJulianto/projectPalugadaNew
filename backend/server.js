@@ -3,133 +3,104 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
-const { body, validationResult } = require('express-validator');
-const crypto = require('crypto');
-const nodemailer = require('nodemailer');
-
 const User = require('./models/user');
+const axios = require('axios');
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 
-// --- Rute Registrasi & Login (Dengan Sedikit Penyesuaian) ---
+const PORT = process.env.PORT || 5000;
+const MONGO_URI = 'mongodb+srv://dickyjulian:dicky123@project-palugada.lgfqi4d.mongodb.net/?retryWrites=true&w=majority&appName=Project-Palugada';
 
-// Rute Registrasi (tidak ada perubahan logika, sudah benar)
-app.post('/register', 
-    [
-        body('username', 'Username minimal 3 karakter').isLength({ min: 3 }).trim().escape(),
-        body('email', 'Format email tidak valid').isEmail().normalizeEmail(),
-        body('password', 'Password minimal 8 karakter').isLength({ min: 8 })
-    ],
-    async (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-        try {
-            const { username, email, password } = req.body;
-            const hashedPassword = await bcrypt.hash(password, 10);
-            const user = new User({ username, email, password: hashedPassword });
-            await user.save();
-            res.status(201).send('User registered successfully');
-        } catch (error) {
-            if (error.code === 11000) {
-                return res.status(400).json({ errors: [{ msg: 'Username atau email sudah digunakan.' }] });
-            }
-            res.status(500).json({ errors: [{ msg: 'Terjadi kesalahan pada server: ' + error.message }] });
-        }
-    }
-);
+mongoose.connect(MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => {
+    console.log('MongoDB connected');
+}).catch(err => console.log(err));
 
-// Rute Login (dengan penambahan 'role' di dalam token)
-app.post('/login', async (req, res) => {
+// Rute Registrasi
+app.post('/register', async (req, res) => {
     try {
-        const { username, password } = req.body;
-        const user = await User.findOne({ $or: [{ username: username }, { email: username }] });
+        const { username, email, password } = req.body;
+        let user = await User.findOne({ email });
+        if (user) {
+            return res.status(400).json({ message: 'User already exists' });
+        }
+        user = new User({ username, email, password });
+        await user.save();
+        res.status(201).send('User registered successfully');
+    } catch (error) {
+        res.status(500).send('Server error');
+    }
+});
+
+// ===============================================
+// == PERBARUI RUTE LOGIN DI BAWAH INI ==
+// ===============================================
+app.post('/login', async (req, res) => {
+    const { username, password, recaptchaToken } = req.body;
+
+    // --- BLOK VERIFIKASI RECAPTCHA ---
+    try {
+        const secretKey = '6LfXy2crAAAAALcAfVkLmoKJDTrsVxsnnPIRKeCx'; // <-- SECRET KEY ANDA (Sangat disarankan dipindah ke .env)
+        const verificationURL = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${recaptchaToken}`;
+
+        const recaptchaResponse = await axios.post(verificationURL);
+        
+        if (!recaptchaResponse.data.success) {
+            return res.status(400).json({ message: 'Verifikasi reCAPTCHA gagal. Silakan coba lagi.' });
+        }
+        // --- AKHIR BLOK VERIFIKASI ---
+
+        // Jika reCAPTCHA valid, lanjutkan proses login
+        const user = await User.findOne({
+            $or: [{ email: username }, { username: username }]
+        });
+
         if (!user) {
             return res.status(400).json({ message: 'Kredensial tidak valid' });
         }
+
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({ message: 'Kredensial tidak valid' });
         }
 
-        // --- PERUBAHAN DI SINI ---
-        // Menambahkan 'role' ke dalam data token (payload)
-        const token = jwt.sign(
-            { userId: user._id, role: user.role }, // Menambahkan peran pengguna ke token
-            process.env.JWT_SECRET || 'your_fallback_jwt_secret',
-            { expiresIn: '1h' }
-        );
-        
-        res.json({ token, role: user.role }); // Mengirim peran juga dalam respons
+        const token = jwt.sign({ id: user._id, role: user.role }, 'your_jwt_secret', { expiresIn: '1h' });
+        res.json({ token, role: user.role });
+
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 });
+// ===============================================
+// == AKHIR PERBARUAN RUTE LOGIN ==
+// ===============================================
 
-
-// --- Middleware & Rute Terproteksi ---
-
-// Middleware Autentikasi (Cek apakah user sudah login)
+// Middleware untuk melindungi rute
 const auth = (req, res, next) => {
+    const token = req.header('x-auth-token');
+    if (!token) {
+        return res.status(401).json({ message: 'No token, authorization denied' });
+    }
     try {
-        const token = req.header('Authorization').replace('Bearer ', '');
-        if (!token) {
-            return res.status(401).send('Akses ditolak. Token tidak ada.');
-        }
-        // Menambahkan 'role' saat token diverifikasi
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_fallback_jwt_secret');
-        req.user = decoded; // req.user sekarang berisi { userId, role }
+        const decoded = jwt.verify(token, 'your_jwt_secret');
+        req.user = decoded;
         next();
-    } catch (error) {
-        res.status(400).send('Token tidak valid.');
+    } catch (e) {
+        res.status(400).json({ message: 'Token is not valid' });
     }
 };
 
-// --- PENAMBAHAN BARU: MIDDLEWARE OTORISASI ADMIN ---
-const adminAuth = (req, res, next) => {
-    // Middleware ini harus dijalankan SETELAH middleware 'auth'
-    if (req.user && req.user.role === 'admin') {
-        next(); // Lanjutkan jika pengguna adalah admin
-    } else {
-        res.status(403).send('Akses ditolak. Hanya untuk admin.'); // Kirim error 403 Forbidden jika bukan admin
-    }
-};
-
-// --- PENAMBAHAN BARU: RUTE KHUSUS ADMIN ---
-// Rute ini hanya bisa diakses oleh user yang login DAN memiliki peran 'admin'
-app.get('/api/admin/data', auth, adminAuth, (req, res) => {
-    // Karena sudah melewati middleware, kita bisa yakin req.user adalah admin
-    res.json({
-        message: `Selamat datang di dasbor admin, ${req.user.userId}!`,
-        secretData: 'Ini adalah data rahasia yang hanya bisa dilihat oleh admin.'
-    });
-});
-
-// Contoh Rute yang hanya butuh login (tanpa harus admin)
-app.get('/api/user/profile', auth, (req, res) => {
-    // Di sini kita bisa mengambil data user dari database berdasarkan req.user.userId
-    res.json({
-        message: 'Ini adalah halaman profil Anda.',
-        userData: req.user
-    });
+// Contoh rute yang dilindungi
+app.get('/protected', auth, (req, res) => {
+    res.send(`Hello user ${req.user.id}, you have access. Your role is ${req.user.role}`);
 });
 
 
-// ... (Rute /forgot-password dan /reset-password tidak perlu diubah) ...
-app.post('/forgot-password', async (req, res) => { /* ... kode lama ... */ });
-app.post('/reset-password', async (req, res) => { /* ... kode lama ... */ });
-
-
-// --- Koneksi & Server ---
-mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('MongoDB connected'))
-    .catch(err => console.log(err));
-
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });

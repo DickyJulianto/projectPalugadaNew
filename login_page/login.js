@@ -73,7 +73,7 @@ if (registerForm) {
 }
 
 
-// --- LOGIKA LOGIN ---
+// --- LOGIKA LOGIN (DENGAN RECAPTCHA) ---
 const loginForm = document.getElementById('loginForm');
 
 if (loginForm) {
@@ -82,13 +82,33 @@ if (loginForm) {
 
         const errorLoginElement = document.getElementById('error-login');
         errorLoginElement.style.display = 'none';
+        
+        // ===============================================
+        // == PENAMBAHAN KODE RECAPTCHA DIMULAI DI SINI ==
+        // ===============================================
+        
+        // 1. Ambil token dari widget reCAPTCHA
+        const recaptchaToken = grecaptcha.getResponse();
+
+        // 2. Validasi jika token kosong
+        if (!recaptchaToken) {
+            errorLoginElement.textContent = 'Harap centang kotak "I\'m not a robot".';
+            errorLoginElement.style.display = 'block';
+            return;
+        }
+        
+        // ===============================================
+        // == AKHIR DARI PENAMBAHAN KODE RECAPTCHA      ==
+        // ===============================================
 
         const usernameOrEmail = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
         
+        // 3. Tambahkan recaptchaToken ke data yang akan dikirim
         const formData = {
             username: usernameOrEmail,
-            password: password
+            password: password,
+            recaptchaToken: recaptchaToken 
         };
 
         try {
@@ -100,28 +120,23 @@ if (loginForm) {
 
             const result = await response.json();
 
-            // ===============================================
-            // == PERBAIKAN SINTAKS ADA DI BLOK INI ==
-            // ===============================================
             if (response.ok) {
                 alert('Login berhasil!');
-                // Simpan token DAN peran pengguna
                 localStorage.setItem('token', result.token);
                 localStorage.setItem('userRole', result.role);
                 window.location.href = '../index.html';
             } else {
-                // blok 'else' ini sekarang berada di dalam 'try'
                 errorLoginElement.textContent = result.message || 'Kredensial tidak valid';
                 errorLoginElement.style.display = 'block';
+                // Reset reCAPTCHA jika login gagal agar bisa dicoba lagi
+                grecaptcha.reset(); 
             }
-            // ===============================================
-            // == AKHIR DARI PERBAIKAN SINTAKS ==
-            // ===============================================
 
         } catch (error) {
             console.error('Terjadi kesalahan saat login:', error);
             errorLoginElement.textContent = 'Tidak dapat terhubung ke server.';
             errorLoginElement.style.display = 'block';
+            grecaptcha.reset(); // Reset juga jika ada network error
         }
     });
 }

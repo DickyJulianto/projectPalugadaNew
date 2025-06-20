@@ -982,6 +982,7 @@ header .fa-times {
     color: var(--custom_white);
     border: none;
     outline: none;
+    cursor: pointer;
     border-radius: 0.8rem;
     -webkit-border-radius: 0.8rem;
     -moz-border-radius: 0.8rem;
