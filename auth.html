@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Authenticating...</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: sans-serif;
+            background-color: #f0f2f5;
+        }
+        .message {
+            font-size: 1.2em;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="message">
+        <p>Login successful, redirecting...</p>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const params = new URLSearchParams(window.location.search);
+            const token = params.get('token');
+            const userRole = params.get('role');
+
+            if (token && userRole) {
+                // Simpan token dan role ke localStorage
+                localStorage.setItem('token', token);
+                localStorage.setItem('userRole', userRole);
+                
+                // Arahkan ke halaman utama
+                window.location.href = '/index.html';
+            } else {
+                // Jika gagal, arahkan kembali ke halaman login
+                alert('Authentication failed. Please try again.');
+                window.location.href = '/login_page/login.html';
+            }
+        });
+    </script>
+</body>
+</html>
