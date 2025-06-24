@@ -24,7 +24,9 @@ const togglePasswordIcons = document.querySelectorAll('.toggle-password');
 
 togglePasswordIcons.forEach(icon => {
     icon.addEventListener('click', () => {
-        const passwordInput = icon.previousElementSibling;
+        // Target input field yang berada satu level di dalam .input-box
+        const passwordInput = icon.parentElement.querySelector('input');
+        
         if (passwordInput.type === 'password') {
             passwordInput.type = 'text';
             icon.classList.remove('bx-hide');
@@ -70,8 +72,7 @@ if (registerForm) {
             if (response.ok) {
                 const resultText = await response.text();
                 alert(resultText || "Registrasi berhasil! Silakan login.");
-                // Otomatis pindah ke panel login setelah registrasi sukses
-                document.querySelector('.login-btn').click(); 
+                document.querySelector('.login-btn').click();
                 registerForm.reset();
             } else {
                 const errorData = await response.json();
@@ -114,7 +115,7 @@ if (loginForm) {
             errorLoginElement.style.display = 'block';
             return;
         }
-
+        
         const usernameOrEmail = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
         
@@ -137,7 +138,7 @@ if (loginForm) {
                 alert('Login berhasil!');
                 localStorage.setItem('token', result.token);
                 localStorage.setItem('userRole', result.role);
-                window.location.href = '../index.html'; // Arahkan ke halaman utama setelah login
+                window.location.href = '../index.html';
             } else {
                 errorLoginElement.textContent = result.message || 'Kredensial tidak valid';
                 errorLoginElement.style.display = 'block';
