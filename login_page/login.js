@@ -1,7 +1,7 @@
+// --- LOGIKA TOGGLE PANEL LOGIN & REGISTER ---
 const container = document.querySelector('.container');
-// Memperbaiki selector agar semua tombol register/login berfungsi
-const registerBtns = document.querySelectorAll('.register-btn, .signUp-link');
-const loginBtns = document.querySelectorAll('.login-btn, .signIn-link');
+const registerBtns = document.querySelectorAll('.register-btn');
+const loginBtns = document.querySelectorAll('.login-btn');
 
 registerBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -17,8 +17,28 @@ loginBtns.forEach(btn => {
     });
 });
 
+// ===============================================
+// == POINT 4: FUNGSI TOGGLE PASSWORD --
+// ===============================================
+const togglePasswordIcons = document.querySelectorAll('.toggle-password');
 
-// --- FORM REGISTRASI ---
+togglePasswordIcons.forEach(icon => {
+    icon.addEventListener('click', () => {
+        const passwordInput = icon.previousElementSibling;
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('bx-hide');
+            icon.classList.add('bx-show');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('bx-show');
+            icon.classList.add('bx-hide');
+        }
+    });
+});
+
+
+// --- LOGIKA FORM REGISTRASI ---
 const registerForm = document.getElementById('registerForm');
 
 if (registerForm) {
@@ -49,8 +69,10 @@ if (registerForm) {
 
             if (response.ok) {
                 const resultText = await response.text();
-                alert(resultText || "Registrasi berhasil!");
-                document.querySelector('.login-btn').click();
+                alert(resultText || "Registrasi berhasil! Silakan login.");
+                // Otomatis pindah ke panel login setelah registrasi sukses
+                document.querySelector('.login-btn').click(); 
+                registerForm.reset();
             } else {
                 const errorData = await response.json();
                 if (errorData.errors) {
@@ -63,6 +85,8 @@ if (registerForm) {
                             alert(err.msg);
                         }
                     });
+                } else if(errorData.message) {
+                    alert('Error: ' + errorData.message);
                 }
             }
         } catch (error) {
@@ -83,28 +107,17 @@ if (loginForm) {
         const errorLoginElement = document.getElementById('error-login');
         errorLoginElement.style.display = 'none';
         
-        // ===============================================
-        // == PENAMBAHAN KODE RECAPTCHA DIMULAI DI SINI ==
-        // ===============================================
-        
-        // 1. Ambil token dari widget reCAPTCHA
         const recaptchaToken = grecaptcha.getResponse();
 
-        // 2. Validasi jika token kosong
         if (!recaptchaToken) {
             errorLoginElement.textContent = 'Harap centang kotak "I\'m not a robot".';
             errorLoginElement.style.display = 'block';
             return;
         }
-        
-        // ===============================================
-        // == AKHIR DARI PENAMBAHAN KODE RECAPTCHA      ==
-        // ===============================================
 
         const usernameOrEmail = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
         
-        // 3. Tambahkan recaptchaToken ke data yang akan dikirim
         const formData = {
             username: usernameOrEmail,
             password: password,
@@ -124,11 +137,10 @@ if (loginForm) {
                 alert('Login berhasil!');
                 localStorage.setItem('token', result.token);
                 localStorage.setItem('userRole', result.role);
-                window.location.href = '../index.html';
+                window.location.href = '../index.html'; // Arahkan ke halaman utama setelah login
             } else {
                 errorLoginElement.textContent = result.message || 'Kredensial tidak valid';
                 errorLoginElement.style.display = 'block';
-                // Reset reCAPTCHA jika login gagal agar bisa dicoba lagi
                 grecaptcha.reset(); 
             }
 
@@ -136,7 +148,7 @@ if (loginForm) {
             console.error('Terjadi kesalahan saat login:', error);
             errorLoginElement.textContent = 'Tidak dapat terhubung ke server.';
             errorLoginElement.style.display = 'block';
-            grecaptcha.reset(); // Reset juga jika ada network error
+            grecaptcha.reset();
         }
     });
 }
