@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Palugada</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>PaluGada Admin</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                <a href="#"><i class="fas fa-users"></i> Users</a>
+                <a href="#"><i class="fas fa-cogs"></i> Settings</a>
+                <a href="../index.html"><i class="fas fa-sign-out-alt"></i> Back to Site</a>
+            </nav>
+        </aside>
+        <main class="main-content">
+            <header class="main-header">
+                <h1>Welcome, Admin!</h1>
+                <button id="logout-button" class="btn-logout">Logout</button>
+            </header>
+            <section class="content-area">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>User Management</h3>
+                    </div>
+                    <div class="card-body">
+                        <p>This table displays all registered users in the system.</p>
+                        <div class="table-wrapper">
+                            <table id="users-table">
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>SSO Provider</th>
+                                        <th>Joined At</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-table-body">
+                                    <tr>
+                                        <td colspan="5" class="loading-text">Loading user data...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>

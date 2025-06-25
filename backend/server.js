@@ -145,3 +145,31 @@ app.post('/login', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
+// ===============================================
+// == RUTE KHUSUS ADMIN ==
+// ===============================================
+
+// Import middleware adminAuth di bagian atas file
+const adminAuth = require('./middleware/adminAuth');
+
+// Rute untuk mendapatkan semua pengguna (Hanya bisa diakses Admin)
+app.get('/api/users', adminAuth, async (req, res) => {
+    try {
+        // Cari semua user, tapi jangan tampilkan passwordnya
+        const users = await User.find().select('-password');
+        res.json(users);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// ===============================================
+// == AKHIR RUTE KHUSUS ADMIN ==
+// ===============================================
+
+
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
