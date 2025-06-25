@@ -110,7 +110,7 @@ app.get(
         // Generate JWT token
         const token = jwt.sign({ id: req.user._id, role: req.user.role }, JWT_SECRET, { expiresIn: '1h' });
         // Redirect ke halaman handler di frontend dengan membawa token
-        res.redirect(`${FRONTEND_URL}/auth-handler.html?token=${token}&role=${req.user.role}`);
+        res.redirect(`${FRONTEND_URL}/auth.html?token=${token}&role=${req.user.role}`);
     }
 );
 
@@ -123,7 +123,7 @@ app.get(
     passport.authenticate('github', { session: false, failureRedirect: `${FRONTEND_URL}/login_page/login.html` }),
     (req, res) => {
         const token = jwt.sign({ id: req.user._id, role: req.user.role }, JWT_SECRET, { expiresIn: '1h' });
-        res.redirect(`${FRONTEND_URL}/auth-handler.html?token=${token}&role=${req.user.role}`);
+        res.redirect(`${FRONTEND_URL}/auth.html?token=${token}&role=${req.user.role}`);
     }
 );
 
