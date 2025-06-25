@@ -1,48 +1,56 @@
-// packages/backend/services/micypediaService.js
-
 const axios = require("axios");
 
 const API_URL = "https://micypedia.id/api/v2";
-// Anda perlu menyimpan API Key ini di file .env
 const API_KEY = process.env.MICYPEDIA_API_KEY;
 
-const micypediaAPI = axios.create({
-    baseURL: API_URL,
-});
-
 // Fungsi untuk mengambil semua layanan dari Micypedia
-const getServices = async () => {
+const getApiServices = async () => {
+    if (!API_KEY) {
+        throw new Error("Micypedia API key is not defined in .env file");
+    }
     try {
-        const response = await micypediaAPI.post("", {
-            key: API_KEY,
-            action: "services",
-        });
-        // Kita akan menambahkan logika untuk menyimpan/update data ini ke database MongoDB kita
-        return response.data;
+        const response = await axios.post(
+            API_URL,
+            new URLSearchParams({
+                key: API_KEY,
+                action: "services",
+            })
+        );
+
+        if (response.data.status === false) {
+            throw new Error("Failed to fetch services from Micypedia API.");
+        }
+        return response.data; // Mengembalikan data layanan
     } catch (error) {
-        console.error("Error fetching services from Micypedia:", error);
-        throw new Error("Failed to fetch services.");
+        console.error("Error fetching services from Micypedia:", error.message);
+        throw error;
     }
 };
 
-// Fungsi untuk membuat pesanan
-const createOrder = async (serviceId, target, quantity) => {
+// Fungsi untuk membuat pesanan baru
+const createApiOrder = async ({ serviceId, target, quantity }) => {
+    if (!API_KEY) {
+        throw new Error("Micypedia API key is not defined in .env file");
+    }
     try {
-        const response = await micypediaAPI.post("", {
-            key: API_KEY,
-            action: "add",
-            service: serviceId,
-            link: target, // 'link' digunakan untuk username atau link post
-            quantity: quantity,
-        });
-        return response.data;
+        const response = await axios.post(
+            API_URL,
+            new URLSearchParams({
+                key: API_KEY,
+                action: "add",
+                service: serviceId,
+                link: target,
+                quantity: quantity,
+            })
+        );
+        return response.data; // Mengembalikan hasil order { order: 12345 } atau { error: '...' }
     } catch (error) {
-        console.error("Error creating order with Micypedia:", error);
-        throw new Error("Failed to create order.");
+        console.error("Error creating order with Micypedia:", error.message);
+        throw error;
     }
 };
 
 module.exports = {
-    getServices,
-    createOrder,
+    getApiServices,
+    createApiOrder,
 };
