@@ -1,56 +1,46 @@
-const axios = require("axios");
+// packages/backend/services/micyPediaService.js
 
-const API_URL = "https://micypedia.id/api/v2";
-const API_KEY = process.env.MICYPEDIA_API_KEY;
+// const axios = require('axios'); // Kita akan gunakan ini nanti
 
-// Fungsi untuk mengambil semua layanan dari Micypedia
-const getApiServices = async () => {
-    if (!API_KEY) {
-        throw new Error("Micypedia API key is not defined in .env file");
-    }
+/**
+ * Mensimulasikan pemesanan ke API Micypedia.
+ * @param {string} apiServiceId - ID Layanan dari produk kita.
+ * @param {string} target - Username/ID target.
+ * @param {number} quantity - Jumlah yang dipesan.
+ * @returns {Promise<object>} - Hasil dari API.
+ */
+const placeOrderMicypedia = async (apiServiceId, target, quantity) => {
+    console.log(
+        `[Micypedia Service] Mencoba memesan layanan ${apiServiceId} untuk ${target}...`
+    );
+
+    // Di sini kita akan menggunakan Axios untuk call API sebenarnya.
+    // Untuk sekarang, kita SIMULASIKAN respons sukses.
     try {
-        const response = await axios.post(
-            API_URL,
-            new URLSearchParams({
-                key: API_KEY,
-                action: "services",
-            })
-        );
+        // Anggap prosesnya butuh 1.5 detik
+        await new Promise((resolve) => setTimeout(resolve, 1500));
 
-        if (response.data.status === false) {
-            throw new Error("Failed to fetch services from Micypedia API.");
-        }
-        return response.data; // Mengembalikan data layanan
-    } catch (error) {
-        console.error("Error fetching services from Micypedia:", error.message);
-        throw error;
-    }
-};
+        const mockResponse = {
+            status: true, // Sukses
+            data: {
+                id_order: Math.floor(100000 + Math.random() * 900000), // Buat ID Order acak
+                harga: 25000, // Contoh harga
+            },
+        };
 
-// Fungsi untuk membuat pesanan baru
-const createApiOrder = async ({ serviceId, target, quantity }) => {
-    if (!API_KEY) {
-        throw new Error("Micypedia API key is not defined in .env file");
-    }
-    try {
-        const response = await axios.post(
-            API_URL,
-            new URLSearchParams({
-                key: API_KEY,
-                action: "add",
-                service: serviceId,
-                link: target,
-                quantity: quantity,
-            })
+        console.log(
+            `[Micypedia Service] Berhasil! ID Order: ${mockResponse.data.id_order}`
         );
-        return response.data; // Mengembalikan hasil order { order: 12345 } atau { error: '...' }
+        return mockResponse;
     } catch (error) {
-        console.error("Error creating order with Micypedia:", error.message);
-        throw error;
+        console.error("[Micypedia Service] Gagal:", error);
+        return {
+            status: false,
+            data: error.message,
+        };
     }
 };
 
 module.exports = {
-    getApiServices,
-    createApiOrder,
+    placeOrderMicypedia,
 };

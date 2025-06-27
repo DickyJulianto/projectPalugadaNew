@@ -1,142 +1,122 @@
-const Product = require("../models/product");
-const {
-    getApiServices,
-    createApiOrder,
-} = require("../services/micyPediaService");
+// packages/backend/controllers/productController.js
 
-// @desc    Sinkronisasi layanan dari Micypedia ke DB kita
-// @route   POST /api/products/sync
-// @access  Admin (untuk sekarang kita buat public untuk testing)
-const syncProducts = async (req, res) => {
+const Product = require('../models/product');
+
+// @desc    Membuat produk baru (Admin only)
+// @route   POST /api/products
+// @access  Private/Admin
+const createProduct = async (req, res) => {
     try {
-        const services = await getApiServices();
+        const { name, description, price, category, apiServiceId, requiresUsername } = req.body;
 
-        // LANGKAH 1: Validasi dan Log Data Mentah dari API
-        if (!services || !Array.isArray(services) || services.length === 0) {
-            console.error(
-                "API Micypedia tidak mengembalikan array layanan yang valid."
-            );
-            return res
-                .status(500)
-                .json({
-                    message:
-                        "Gagal mengambil data layanan yang valid dari API.",
-                });
+        // Validasi sederhana
+        if (!name || !description || !price || !category || !apiServiceId) {
+            return res.status(400).json({ message: 'Harap isi semua field yang wajib diisi.' });
         }
 
-        console.log(
-            `Berhasil menerima ${services.length} layanan dari API. Contoh data pertama:`,
-            services[0]
-        );
-
-        const operations = services.map((service) => ({
-            updateOne: {
-                filter: { serviceId: service.service },
-                update: {
-                    $set: {
-                        name: service.name,
-                        type: service.type,
-                        category: service.category,
-                        price: parseFloat(service.rate),
-                        minOrder: parseInt(service.min, 10),
-                        maxOrder: parseInt(service.max, 10),
-                        description: service.dripfeed
-                            ? "Drip-feed available"
-                            : "",
-                    },
-                },
-                upsert: true,
-            },
-        }));
-
-        console.log("Contoh operasi untuk bulkWrite:", operations[0]);
-
-        // LANGKAH 2: Jalankan bulkWrite dan simpan hasilnya
-        const result = await Product.bulkWrite(operations);
-        console.log("Hasil dari operasi bulkWrite:", result);
-
-        // LANGKAH 3: Verifikasi apakah ada data yang benar-benar ditulis
-        if (
-            result.upsertedCount === 0 &&
-            result.modifiedCount === 0 &&
-            result.deletedCount === 0
-        ) {
-            console.warn(
-                "Peringatan: Operasi bulkWrite selesai tetapi tidak ada dokumen yang ditambahkan, diubah, atau dihapus."
-            );
-            // Kirim pesan sukses, tapi dengan detail bahwa tidak ada data berubah
-            return res.status(200).json({
-                message:
-                    "Sinkronisasi selesai, namun tidak ada data baru yang ditambahkan atau data lama yang diubah.",
-                details: result,
-            });
-        }
-
-        // Jika sukses, kirim respons dengan detail jumlah data yang diproses
-        res.status(200).json({
-            message: `Sinkronisasi sukses! ${result.upsertedCount} layanan ditambahkan, ${result.modifiedCount} layanan diperbarui.`,
-            details: result,
+        const product = new Product({
+            name,
+            description,
+            price,
+            category,
+            apiServiceId,
+            requiresUsername,
         });
+
+        const createdProduct = await product.save();
+        res.status(201).json(createdProduct);
     } catch (error) {
-        console.error("Sync Error:", error);
-        res.status(500).json({
-            message: "Terjadi error saat sinkronisasi produk dengan Micypedia.",
-            errorDetails: error.message,
-        });
+        console.error('Error creating product:', error);
+        res.status(500).json({ message: 'Terjadi kesalahan pada server' });
     }
 };
 
-// ... (fungsi getProducts dan createOrder tidak perlu diubah)
-const getProducts = async (req, res) => {
+// @desc    Mengambil semua produk
+// @route   GET /api/products
+// @access  Public
+const getAllProducts = async (req, res) => {
     try {
-        const products = await Product.find().sort({ category: 1, price: 1 });
+        // Fitur filter berdasarkan kategori
+        const filter = req.query.category ? { category: req.query.category } : {};
+        
+        const products = await Product.find(filter);
         res.json(products);
     } catch (error) {
-        res.status(500).json({
-            message: "Error fetching products from database.",
-        });
+        console.error('Error fetching products:', error);
+        res.status(500).json({ message: 'Terjadi kesalahan pada server' });
     }
 };
 
-const createOrder = async (req, res) => {
-    // ... kode yang sudah ada
-    const { serviceId, target, quantity } = req.body;
-
-    if (!serviceId || !target || !quantity) {
-        return res.status(400).json({
-            message: "Please provide serviceId, target, and quantity",
-        });
-    }
-
+// @desc    Mengambil satu produk berdasarkan ID
+// @route   GET /api/products/:id
+// @access  Public
+const getProductById = async (req, res) => {
     try {
-        const product = await Product.findOne({ serviceId: serviceId });
-        if (!product) {
-            return res.status(404).json({ message: "Product not found." });
+        const product = await Product.findById(req.params.id);
+
+        if (product) {
+            res.json(product);
+        } else {
+            res.status(404).json({ message: 'Produk tidak ditemukan' });
         }
-
-        const orderResult = await createApiOrder({
-            serviceId,
-            target,
-            quantity,
-        });
-
-        if (orderResult.error) {
-            return res
-                .status(400)
-                .json({ message: `Order failed: ${orderResult.error}` });
-        }
-
-        res.status(201).json({
-            message: "Order placed successfully!",
-            orderDetails: orderResult,
-        });
     } catch (error) {
-        res.status(500).json({ message: "Server error while creating order." });
+        console.error(`Error fetching product with id ${req.params.id}:`, error);
+        res.status(500).json({ message: 'Terjadi kesalahan pada server' });
     }
 };
+
+// @desc    Memperbarui produk (Admin only)
+// @route   PUT /api/products/:id
+// @access  Private/Admin
+const updateProduct = async (req, res) => {
+    try {
+        const { name, description, price, category, apiServiceId, requiresUsername } = req.body;
+
+        const product = await Product.findById(req.params.id);
+
+        if (product) {
+            product.name = name || product.name;
+            product.description = description || product.description;
+            product.price = price || product.price;
+            product.category = category || product.category;
+            product.apiServiceId = apiServiceId || product.apiServiceId;
+            product.requiresUsername = requiresUsername !== undefined ? requiresUsername : product.requiresUsername;
+
+            const updatedProduct = await product.save();
+            res.json(updatedProduct);
+        } else {
+            res.status(404).json({ message: 'Produk tidak ditemukan' });
+        }
+    } catch (error) {
+        console.error(`Error updating product with id ${req.params.id}:`, error);
+        res.status(500).json({ message: 'Terjadi kesalahan pada server' });
+    }
+};
+
+// @desc    Menghapus produk (Admin only)
+// @route   DELETE /api/products/:id
+// @access  Private/Admin
+const deleteProduct = async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+
+        if (product) {
+            await product.deleteOne(); // atau .remove() untuk versi Mongoose lama
+            res.json({ message: 'Produk berhasil dihapus' });
+        } else {
+            res.status(404).json({ message: 'Produk tidak ditemukan' });
+        }
+    } catch (error) {
+        console.error(`Error deleting product with id ${req.params.id}:`, error);
+        res.status(500).json({ message: 'Terjadi kesalahan pada server' });
+    }
+};
+
 
 module.exports = {
-    syncProducts,
-    getProducts,
-    createOrder,
+    createProduct,
+    getAllProducts,
+    getProductById,
+    updateProduct,
+    deleteProduct,
 };

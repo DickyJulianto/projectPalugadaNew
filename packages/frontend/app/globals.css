@@ -3,8 +3,17 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+    --blue: #39a7ff;
+    --light_blue: #87c4ff;
+    --custom_white: #e0f4ff;
+    --cream: #ffeed9;
+    --custom_grey: #121b25;
+    --light_grey: #555;
+}
+
+::selection {
+    background: var(--cream);
+    color: var(--blue);
 }
 
 @media (prefers-color-scheme: dark) {

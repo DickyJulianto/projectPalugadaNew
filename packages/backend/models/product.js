@@ -1,46 +1,42 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-const productSchema = new mongoose.Schema(
-    {
-        serviceId: {
-            type: Number,
-            required: true,
-            unique: true,
-            index: true, // Menambahkan index untuk pencarian yang lebih cepat
-        },
-        name: {
-            type: String,
-            required: true,
-        },
-        category: {
-            type: String,
-            required: true,
-            index: true,
-        },
-        price: {
-            // Ini adalah harga asli dari API (biasanya per 1000)
-            type: Number,
-            required: true,
-        },
-        minOrder: {
-            type: Number,
-            required: true,
-        },
-        maxOrder: {
-            type: Number,
-            required: true,
-        },
-        description: {
-            type: String,
-        },
-        type: {
-            type: String,
-            required: true,
-        },
+// Definisikan struktur (skema) untuk produk
+const productSchema = new Schema({
+    name: {
+        type: String,
+        required: [true, "Nama produk tidak boleh kosong"],
+        trim: true
     },
-    { timestamps: true }
-);
+    description: {
+        type: String,
+        required: [true, "Deskripsi produk tidak boleh kosong"]
+    },
+    price: {
+        type: Number,
+        required: [true, "Harga produk tidak boleh kosong"],
+        min: [0, "Harga produk tidak boleh negatif"]
+    },
+    category: {
+        type: String,
+        required: [true, "Kategori produk tidak boleh kosong"],
+        enum: ["Instagram", "TikTok", "YouTube", "Lainnya"], // Contoh kategori, bisa disesuaikan
+        default: "Lainnya"
+    },
+    // ID layanan dari API Micypedia, penting untuk transaksi nanti
+    apiServiceId: {
+        type: String,
+        required: [true, "ID Layanan dari API pihak ketiga wajib diisi"]
+    },
+    // Menandakan apakah produk ini butuh input username atau link
+    requiresUsername: {
+        type: Boolean,
+        default: true
+    }
+}, { timestamps: true }); // timestamps akan otomatis membuat field createdAt dan updatedAt
 
-const Product = mongoose.model("Product", productSchema);
+// Buat model dari skema yang telah didefinisikan
+const Product = mongoose.model('Product', productSchema);
 
+// Ekspor model agar bisa digunakan di file lain
 module.exports = Product;

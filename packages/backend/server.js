@@ -12,11 +12,15 @@ const GitHubStrategy = require('passport-github2').Strategy;
 
 // Import Models and Routes
 const User = require('./models/user');
-const productRoutes = require('./routes/productRoutes'); // Import product routes
+const Product = require('./models/product');
+require('./models/Order');
+
+const productRoutes = require('./routes/productRoutes');
+const orderRoutes = require('./routes/orderRoutes');
 
 const app = express();
 
-// Middleware
+// Middleware   
 app.use(cors());
 app.use(express.json()); // Body parser
 app.use(passport.initialize()); // Inisialisasi Passport
@@ -118,11 +122,12 @@ const adminAuth = require('./middleware/adminAuth');
 app.get('/api/users', adminAuth, async (req, res) => { /* ... kode Anda ... */ });
 
 // Rute untuk Produk dan Pesanan (BARU)
-app.use('/api/products', productRoutes); // <-- PERBAIKAN: Dipindahkan ke sini agar rapi
+app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
 
 // ===============================================
 // == MULAI SERVER ==
 // ===============================================
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
-}); // <-- PERBAIKAN: Hanya ada satu app.listen
+});

@@ -1,17 +1,37 @@
+// packages/backend/routes/productRoutes.js
+
 const express = require('express');
 const router = express.Router();
-const { syncProducts, getProducts, createOrder } = require('../controllers/productController');
-// const { protect } = require('../middleware/authMiddleware'); // Kita akan aktifkan ini nanti
+const {
+    createProduct,
+    getAllProducts,
+    getProductById,
+    updateProduct,
+    deleteProduct,
+} = require('../controllers/productController');
 
-// Endpoint untuk mengambil semua produk yang akan ditampilkan ke user
-router.get('/', getProducts);
+// Untuk sementara, kita belum menambahkan otentikasi admin.
+// Nanti kita akan menambahkan middleware di sini untuk melindungi route create, update, dan delete.
+// const { protect, admin } = require('../middleware/authMiddleware');
 
-// Endpoint untuk membuat pesanan baru
-// Nantinya kita akan tambahkan middleware 'protect' agar hanya user login yang bisa akses
-router.post('/order', createOrder);
+// === Definisi Route ===
 
-// Endpoint untuk admin melakukan sinkronisasi manual data produk dari Micypedia
-router.post('/sync', syncProducts);
+// GET /api/products -> Mengambil semua produk (bisa difilter by category)
+// GET /api/products?category=Instagram
+router.get('/', getAllProducts);
+
+// GET /api/products/:id -> Mengambil satu produk
+router.get('/:id', getProductById);
+
+// --- Route Khusus Admin ---
+// POST /api/products -> Membuat produk baru
+router.post('/', createProduct); // Nanti ditambahkan middleware: protect, admin
+
+// PUT /api/products/:id -> Memperbarui produk
+router.put('/:id', updateProduct); // Nanti ditambahkan middleware: protect, admin
+
+// DELETE /api/products/:id -> Menghapus produk
+router.delete('/:id', deleteProduct); // Nanti ditambahkan middleware: protect, admin
 
 
 module.exports = router;
