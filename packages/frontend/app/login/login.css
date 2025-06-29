@@ -1,0 +1,196 @@
+/* login.css (Revisi Sesuai Permintaan) */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+    --blue: #39a7ff;
+    --light_blue: #87c4ff;
+    --custom_white: #e0f4ff;
+    --cream: #ffeed9;
+    --custom_grey: #121b25;
+    --light_grey: #555;
+}
+
+::selection {
+    background: var(--cream);
+    color: var(--blue);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    font-family: 'Lilita One', sans-serif;
+    box-sizing: border-box;
+    text-decoration: none;
+    outline: none;
+    list-style-type: none;
+}
+
+.login-body-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(90deg, #ffeed9, #39a7ff);
+    padding: 20px;
+}
+
+.container {
+    position: relative;
+    width: 850px;
+    height: 600px; /* Kembali ke tinggi tetap untuk login */
+    background: #fff;
+    border-radius: 30px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, .2);
+    margin: 20px;
+    overflow: hidden;
+    transition: height 0.6s ease-in-out; /* Animasi tinggi */
+}
+
+.container.active {
+    height: 680px; /* Tinggi saat register aktif */
+}
+
+.form-box {
+    position: absolute;
+    right: 0;
+    width: 50%;
+    height: 100%;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #333;
+    text-align: center;
+    padding: 40px;
+    z-index: 1;
+    /* Logika transisi dan visibility yang dikembalikan */
+    transition: .6s ease-in-out 1.2s, visibility 0s 1s; 
+}
+
+.container.active .form-box {
+    right: 50%;
+}
+
+.form-box.register {
+    visibility: hidden;
+}
+
+.container.active .form-box.register {
+    visibility: visible;
+}
+
+form {
+    width: 100%;
+}
+
+.container h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
+}
+
+.input-box {
+    position: relative;
+    margin: 1.25rem 0;
+}
+
+.input-box input {
+    width: 100%;
+    padding: 13px 50px 13px 20px;
+    background: #eee;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif; /* Pastikan input menggunakan Poppins */
+    text-transform: none; /* REVISI 1 */
+}
+
+/* ... (sisa style input-box dan lainnya tetap sama) ... */
+.input-box i {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: #888;
+}
+.input-box .toggle-password { cursor: pointer; }
+.forgot-link { text-align: right; margin: -10px 0 15px 0; }
+.forgot-link a { font-size: 14.5px; color: #333; text-decoration: none; }
+.forgot-link a:hover { text-decoration: underline; }
+.btn { width: 100%; height: 48px; background: #39a7ff; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,.1); border: none; cursor: pointer; font-size: 16px; color: #fff; font-weight: 600; letter-spacing: 1.8px; }
+.container p { font-size: 14.5px; margin: 15px 0; font-family: 'Poppins', sans-serif; }
+.social-icons { display: flex; justify-content: center; }
+.social-icons a { display: inline-flex; padding: 10px; border: 2px solid #ccc; border-radius: 8px; font-size: 24px; color: #333; text-decoration: none; margin: 0 8px; }
+
+/* Style untuk toggle panel dikembalikan ke versi asli */
+.toggle-box {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+.toggle-box::before {
+    content: '';
+    position: absolute;
+    left: -250%;
+    width: 300%;
+    height: 100%;
+    background: #39a7ff;
+    border-radius: 150px;
+    z-index: 2;
+    transition: 1.8s ease-in-out;
+}
+.container.active .toggle-box::before {
+    left: 50%;
+}
+.toggle-panel {
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+    transition: .6s ease-in-out;
+    text-align: center;
+}
+.toggle-panel.toggle-left {
+    left: 0;
+    transition-delay: 1.2s;
+}
+.container.active .toggle-panel.toggle-left {
+    left: -50%;
+    transition-delay: .6s;
+}
+.toggle-panel.toggle-right {
+    right: -50%;
+    transition-delay: .6s;
+}
+.container.active .toggle-panel.toggle-right {
+    right: 0;
+    transition-delay: 1.2s;
+}
+.toggle-panel .btn {
+    width: 160px;
+    height: 46px;
+    background: transparent;
+    border: 2px solid #fff;
+    box-shadow: none;
+}
+.error-message {
+    display: block;
+    height: 16px;
+    color: #c0392b;
+    font-size: 14px;
+    font-family: 'Poppins', sans-serif;
+    text-align: left;
+    width: 100%;
+    margin-top: -15px;
+    margin-bottom: 10px;
+    padding-left: 5px;
+    font-weight: 500;
+}
