@@ -27,12 +27,12 @@ app.use(passport.initialize()); // Inisialisasi Passport
 
 // Environment Variables
 const PORT = process.env.PORT || 5000;
-// const MONGO_URI = process.env.MONGO_URI; // Kita nonaktifkan ini untuk sementara
+const MONGO_URI = process.env.MONGO_URI;
 const JWT_SECRET = process.env.JWT_SECRET;
+const FRONTEND_URL = process.env.FRONTEND_URL;
 
 // Database Connection
-// PERHATIAN: Ini hanya untuk tes diagnostik!
-mongoose.connect("mongodb+srv://dickyjs:renjerBiru123@palugadacluster.xcrtrg4.mongodb.net/?retryWrites=true&w=majority&appName=palugadaCluster") 
+mongoose.connect(MONGO_URI)
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.log(err));
 
