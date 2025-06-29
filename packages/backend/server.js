@@ -1,5 +1,5 @@
-// Memuat environment variables dari file .env
-require('dotenv').config();
+// // Memuat environment variables dari file .env
+// require('dotenv').config();
 
 const express = require('express');
 const mongoose = require('mongoose');
