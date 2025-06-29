@@ -1,7 +1,9 @@
+// packages/frontend/app/components/CartPanel.js (Setelah Diperbaiki)
+
 import { useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
-import { useUser } from "@clerk/nextjs";
 
+// Pindahkan inisialisasi Stripe ke luar agar tidak dibuat ulang terus-menerus
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
 export default function CartPanel({
@@ -11,17 +13,21 @@ export default function CartPanel({
   total,
   closeCart,
 }) {
-  const { isSignedIn, user } = useUser();
   const [loading, setLoading] = useState(false);
 
+  // Untuk sekarang, kita anggap user sudah login jika mereka bisa checkout
+  // Nanti ini bisa diintegrasikan dengan token dari localStorage
+  const isSignedIn = true; // Asumsi sementara
+
   const checkout = async () => {
-    // Redirect to sign in to checkout
     if (!isSignedIn) {
-      window.location.href = "/sign-in";
+      // Arahkan ke halaman login kustom Anda
+      window.location.href = "/login_page/login.html";
       return;
     }
 
-    const email = user?.emailAddresses?.[0]?.emailAddress;
+    // Untuk sementara, kita tidak mengirim email, atau Anda bisa menggunakan email statis
+    const email = "testing@example.com"; // Email placeholder
 
     setLoading(true);
 
@@ -29,7 +35,7 @@ export default function CartPanel({
       const response = await fetch("/api/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cart, email }),
+        body: JSON.stringify({ cart, email }), // Kirim email placeholder
       });
 
       const session = await response.json();
@@ -97,8 +103,8 @@ export default function CartPanel({
           {/* Checkout Button */}
           <button
             onClick={checkout}
-            disabled={loading}
-            className="mt-4 py-2 bg-green-500 text-white rounded px-6"
+            disabled={loading || cart.length === 0} // Nonaktifkan jika loading atau keranjang kosong
+            className="mt-4 py-2 bg-green-500 text-white rounded px-6 disabled:bg-gray-500"
           >
             {loading ? "Processing..." : "Checkout"}
           </button>
