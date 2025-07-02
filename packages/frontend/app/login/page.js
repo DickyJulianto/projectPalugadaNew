@@ -1,17 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import "./login.css";
+import { toast } from "react-toastify";
 
+// Hanya ada SATU deklarasi fungsi komponen
 export default function LoginPage() {
     const [isActive, setIsActive] = useState(false);
     const [errorLogin, setErrorLogin] = useState("");
     const [errorRegister, setErrorRegister] = useState({});
-    const { login } = useAuth(); // Mengambil fungsi login dari AuthContext
+    const { login } = useAuth();
 
-    // Efek untuk menangani toggle password, akan berfungsi untuk kedua form
+    // Efek untuk menangani toggle password
     useEffect(() => {
         const container = document.querySelector(".login-body-wrapper");
         if (!container) return;
@@ -68,7 +69,7 @@ export default function LoginPage() {
             const result = await response.json();
             if (!response.ok) throw result;
 
-            alert("Registrasi berhasil! Silakan login.");
+            toast.success("Registrasi berhasil! Silakan login.");
             setIsActive(false);
             form.reset();
         } catch (error) {
@@ -79,7 +80,7 @@ export default function LoginPage() {
                 });
                 setErrorRegister(newErrors);
             } else {
-                alert(
+                toast.error(
                     `Registrasi Gagal: ${
                         error.message || "Error tidak diketahui"
                     }`
@@ -115,6 +116,7 @@ export default function LoginPage() {
             login(result.token, result.role);
         } catch (error) {
             setErrorLogin(error.message || "Kredensial tidak valid.");
+            toast.error(error.message || "Kredensial tidak valid.");
         }
     };
 

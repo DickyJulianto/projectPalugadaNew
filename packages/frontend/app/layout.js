@@ -1,8 +1,9 @@
 import { Lilita_One } from 'next/font/google';
 import './css/style.css'; 
 import "./globals.css"; 
-// Impor AuthProvider yang baru kita buat
 import { AuthProvider } from './context/AuthContext';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const lilitaOne = Lilita_One({
   subsets: ['latin'],
@@ -29,8 +30,20 @@ export default function RootLayout({ children }) {
         <link rel="shortcut icon" href="/assets/logo/logo3.png" type="image/png" />
       </head>
       <body className={lilitaOne.className}>
-        {/* Bungkus children dengan AuthProvider */}
         <AuthProvider>
+          {/* ToastContainer agar notifikasi bisa muncul */}
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
           {children}
         </AuthProvider>
       </body>
