@@ -113,7 +113,7 @@ app.post(
             }
             user = new User({ username, email, password });
             await user.save();
-            res.status(201).send('User registered successfully');
+            res.status(201).json('User registered successfully');
         } catch (err) {
             console.error(err.message);
             res.status(500).send('Server error');

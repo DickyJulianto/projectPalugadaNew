@@ -2,27 +2,23 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../context/AuthContext";
 import "./login.css";
 
 export default function LoginPage() {
     const [isActive, setIsActive] = useState(false);
     const [errorLogin, setErrorLogin] = useState("");
     const [errorRegister, setErrorRegister] = useState({});
-    const router = useRouter();
+    const { login } = useAuth(); // Mengambil fungsi login dari AuthContext
 
-    // ==========================================================
-    // == PERBAIKAN: Logika useEffect disempurnakan di sini ==
-    // ==========================================================
+    // Efek untuk menangani toggle password, akan berfungsi untuk kedua form
     useEffect(() => {
-        // Kita targetkan elemen pembungkus terluar
         const container = document.querySelector(".login-body-wrapper");
         if (!container) return;
 
-        // Fungsi ini akan menangani semua klik di dalam container
         const handleIconClick = (event) => {
-            // Cek apakah yang di-klik adalah ikon toggle password
             const icon = event.target.closest(".toggle-password");
-            if (!icon) return; // Jika bukan, abaikan
+            if (!icon) return;
 
             const passwordInput = icon.parentElement.querySelector("input");
             if (passwordInput.type === "password") {
@@ -36,16 +32,14 @@ export default function LoginPage() {
             }
         };
 
-        // Tambahkan satu event listener ke pembungkus utama
         container.addEventListener("click", handleIconClick);
 
-        // Fungsi cleanup untuk menghapus listener saat komponen tidak lagi digunakan
         return () => {
             container.removeEventListener("click", handleIconClick);
         };
-    }, []); // Dependency array kosong, berarti ini hanya berjalan sekali saat komponen mount
+    }, []);
 
-    // ... (Sisa kode: handleRegisterSubmit dan handleLoginSubmit tidak perlu diubah)
+    // Fungsi untuk handle submit form registrasi
     const handleRegisterSubmit = async (event) => {
         event.preventDefault();
         setErrorRegister({});
@@ -94,6 +88,7 @@ export default function LoginPage() {
         }
     };
 
+    // Fungsi untuk handle submit form login
     const handleLoginSubmit = async (event) => {
         event.preventDefault();
         setErrorLogin("");
@@ -116,8 +111,7 @@ export default function LoginPage() {
             const result = await response.json();
             if (!response.ok) throw result;
 
-            // PANGGIL FUNGSI LOGIN DARI CONTEXT
-            // Ini akan menyimpan token dan mengarahkan pengguna secara otomatis
+            // Panggil fungsi 'login' dari context
             login(result.token, result.role);
         } catch (error) {
             setErrorLogin(error.message || "Kredensial tidak valid.");
@@ -207,7 +201,6 @@ export default function LoginPage() {
                                 placeholder="Password"
                                 required
                             />
-                            {/* Ikon ini sekarang akan berfungsi dengan benar */}
                             <i className="bx bx-hide toggle-password"></i>
                         </div>
                         <div className="error-message">
@@ -220,7 +213,6 @@ export default function LoginPage() {
                                 placeholder="Confirm Password"
                                 required
                             />
-                            {/* Ikon ini juga akan berfungsi dengan benar */}
                             <i className="bx bx-hide toggle-password"></i>
                         </div>
                         <div className="error-message">
