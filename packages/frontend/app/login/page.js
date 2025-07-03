@@ -148,7 +148,7 @@ export default function LoginPage() {
                             {errorLogin || "\u00A0"}
                         </div>
                         <div className="forgot-link">
-                            <a href="#">Forgot password?</a>
+                            <a href="/forgot-password">Forgot password?</a>
                         </div>
                         <button type="submit" className="btn">
                             Login

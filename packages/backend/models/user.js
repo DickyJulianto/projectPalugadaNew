@@ -17,7 +17,6 @@ const UserSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        // Password tidak lagi wajib, karena pengguna SSO tidak memiliki password
         required: function() { return !this.ssoProvider; } 
     },
     role: {
@@ -25,32 +24,34 @@ const UserSchema = new mongoose.Schema({
         enum: ['user', 'admin'],
         default: 'user'
     },
-    // ===============================================
-    // == FIELD BARU UNTUK SSO DITAMBAHKAN DI SINI ==
-    // ===============================================
     ssoProvider: {
         type: String,
-        required: false // Tidak wajib untuk pendaftaran manual
+        required: false
     },
     ssoId: {
         type: String,
         required: false,
         unique: true,
-        sparse: true // Memungkinkan nilai null/kosong menjadi tidak unik
+        sparse: true
     },
-    // ===============================================
-    // == AKHIR DARI PENAMBAHAN FIELD SSO           ==
-    // ===============================================
+    // Field untuk reset password ditempatkan di sini
+    resetPasswordToken: {
+        type: String,
+    },
+    resetPasswordExpires: {
+        type: Date,
+    },
+    // Hanya ada satu field createdAt
     createdAt: {
         type: Date,
         default: Date.now
     }
 });
 
+
 // Hash password sebelum menyimpan untuk pendaftaran manual
 UserSchema.pre('save', async function(next) {
-    // Hanya hash password jika field ini diubah (atau baru) dan bukan dari SSO
-    if (!this.isModified('password') || this.ssoProvider) {
+    if (!this.isModified('password') || !this.password) {
         return next();
     }
     try {
